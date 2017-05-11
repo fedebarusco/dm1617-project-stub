@@ -73,21 +73,31 @@ public class TfIdfTransformation {
         JavaPairRDD<WikiPage, Vector> pagesAndVectors = pages.zip(tfidf);
 
         // Cluster the data into two classes using KMeans
-        int numClusters = 2;
+        int numClusters = 100;
         int numIterations = 20;
         KMeansModel clusters = KMeans.train(tfidf.rdd(), numClusters, numIterations);
 
         System.out.println("Cluster centers:");
-        for (Vector center: clusters.clusterCenters()) {
+        for (Vector center : clusters.clusterCenters()) {
             System.out.println(" " + center);
         }
         // here is what I added to predict data points that are within the clusters
-        List<Integer> L= clusters.predict(tfidf).collect();
-        for (Integer i:L) {
+        List<Integer> L = clusters.predict(tfidf).collect();
+        for (Integer i : L) {
             System.out.println(i);
         }
-        pagesAndVectors = pages.zip(tfidf);
 
+        /* Map delle coppie (pag, vettore) utilizzando il modello creato prima e il metodo predict
+        che prendendo come argomento il vettore corrispondente alla pg restituisce il cluster, l'RDD
+        restituita alla fine è la coppia (pagina, indice del cluster corrispondente)
+         */
+        JavaPairRDD<WikiPage, Integer> clustersNew = pagesAndVectors.mapToPair(pav -> {
+            return new Tuple2<WikiPage, Integer>(pav._1(), clusters.predict(pav._2()));
+        });
+
+        for (Tuple2<WikiPage, Integer> p : clustersNew.collect()) {
+            System.out.println(p._1().getTitle() + ", cluster: " + p._2());
+        }
 
         // Finally, we print the distance between the first two pages
         List<Tuple2<WikiPage, Vector>> firstPages = pagesAndVectors.take(2);
