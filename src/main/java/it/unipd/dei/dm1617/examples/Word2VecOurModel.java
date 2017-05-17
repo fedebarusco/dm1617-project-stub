@@ -50,21 +50,37 @@ public class Word2VecOurModel {
                 .setVectorSize(100)
                 .fit(lemmas);
 
-        /*
-        JavaPairRDD<WikiPage, Vector> v = pageAndLemma.mapToPair(pair -> {
-            Vector docvec;
-                     //Vectors.dense(1.0, 0.0, 3.0);
-            for(String lemma : pair._2()){
-                docvec
-                model.transform(lemma);
-            }
 
+        JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
+            Vector docvec = null;
+            for(String lemma : pair._2()){
+                Vector tmp = model.transform(lemma);
+                if(docvec==null){
+                    docvec = tmp;
+                }else{
+                    docvec = sumVectors(tmp,docvec);
+                }
+            }
             return new Tuple2<WikiPage,Vector>(pair._1(),docvec);
         });
-        */
+
+        for(Tuple2<WikiPage, Vector> el : pageAndVector.collect()){
+            System.out.println(el._1().getTitle());
+            System.out.println(el._2());
+        }
+        System.out.println();
         //Tuple2<String, Object>[] synonyms = model.findSynonyms("age", 5);
         //synonyms.
         model.save(sc.sc(), "datapath");
+    }
+
+    public static Vector sumVectors(Vector v1, Vector v2){
+        int size = v1.toArray().length;
+        double[] sum = new double[size];
+        for(int i = 0; i < size; i++){
+            sum[i]=v1.toArray()[i] + v2.toArray()[i];
+        }
+        return Vectors.dense(sum);
     }
 }
 /*
