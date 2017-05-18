@@ -16,6 +16,27 @@ import java.util.regex.Pattern;
  * stemming. For a discussion of the difference between stemming and
  * lemmatization see this link: https://nlp.stanford.edu/IR-book/html/htmledition/stemming-and-lemmatization-1.html
  */
+/*
+  La LEMMATIZZAZIONE è il processo di riduzione di una forma flessa
+  di una parola alla sua forma canonica (non marcata), detta lemma.
+  Nell'elaborazione del linguaggio naturale, la lemmatizzazione è il
+  processo algoritmico che determina automaticamente il lemma di una
+  data parola. Il processo può coinvolgere altre attività di elaborazione
+  del linguaggio, quali ad esempio l'analisi morfologica e grammaticale.
+  In molte lingue, le parole appaiono in diverse forme flesse.
+  Per esempio, in italiano il verbo camminare può apparire come cammina,
+  camminò, camminando e così via. La forma canonica, camminare, è il
+  lemma della parola ed è la forma di riferimento per cercare la parola
+  all'interno di un dizionario.
+ */
+/*
+  Lo STEMMING è il processo di riduzione della forma flessa di una parola
+  alla sua forma radice, detta tema. Il tema non corrisponde necessariamente
+  alla radice morfologica (lemma) della parola: normalmente è sufficiente
+  che le parole correlate siano mappate allo stesso tema (ad esempio, che
+  andare, andai, andò mappino al tema and), anche se quest'ultimo non è una
+  valida radice per la parola.
+ */
 public class Lemmatizer {
 
   /**

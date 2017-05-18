@@ -21,6 +21,61 @@ import java.util.ArrayList;
 /**
  * Created by Emanuele on 11/05/2017.
  */
+/*
+    ENG: The purpose and usefulness of Word2vec is to group the vectors
+    of similar words together in vectorspace. That is, it detects
+    similarities mathematically. Word2vec creates vectors that are
+    distributed numerical representations of word features, features
+    such as the context of individual words.
+    Given enough data, usage and contexts, Word2vec can make highly
+    accurate guesses about a word’s meaning based on past appearances.
+    Those guesses can be used to establish a word’s association with
+    other words (e.g. “man” is to “boy” what “woman” is to “girl”),
+    or cluster documents and classify them by topic.
+    The output of the Word2vec neural net is a vocabulary in which
+    each item has a vector attached to it, which can be fed into
+    a deep-learning net or simply queried to detect relationships
+    between words.
+    ITA: Word2vec è una semplice rete neurale artificiale a due strati
+    progettata per elaborare il linguaggio naturale, l'algoritmo
+    richiede in ingresso un corpus e restituisce un insieme di vettori
+    che rappresentano la distribuzione semantica delle parole nel testo.
+    Viene costruito un vettore per ogni parola contenuta nel corpus
+    e ogni parola, rappresentata come un punto nello spazio
+    multidimensionale creato. In questo spazio le parole saranno più
+    vicine se riconosciute come semanticamente più simili.
+ */
+/*
+    Word2Vec e` un modello che, dato un corpus di documenti, associa a
+    ogni parola un vettore in uno spazio di dimensionalita` decisa dall'utente.
+    Spark fornisce un'implementazione che funziona come segue.
+    - Dato un dataset di testi, di tipo JavaRDD<String>
+    - Trasformare ogni documento del dataset in una sequenza di token
+      (potenzialmente con qualche ulteriore preprocessing). L'importante e` ottenere
+      un dataset di tipo JavaRDD<Iterable<String>>.
+    - Creare un oggetto di tipo org.apache.spark.mllib.feature.Word2Vec, che va configurato
+      usando i vari metodi "set...".
+    - Una volta configurato l'oggetto Word2Vec, allenare il modello invocando il metodo
+      Word2Vec.fit con argomento il dataset di sequenze di token.
+    - Questa invocazione restituisce un oggetto di tipo Word2VecModel. E' possibile usare
+      questo oggetto per trovare il vettore che rappresenta una data parola usando il
+      metodo transform(String).
+
+    Manca la funzionalita` per trasformare i documenti in vettori usando questo modello.
+    Un modo semplice di farlo e` di trasformare ogni parola di un documento nel vettore
+    corrispondente e poi fare la media:
+
+    Distribuire ai vari worker il modello allenato usando il metodo del broadcast visto a lezione.
+    Per ogni documento, inizializzare il vettore somma usando il metodo statico Vectors.zeros
+    Per ogni parola del documento ottenere il vettore corrispondente usando il metodo transform
+    del modello, e sommare questo vettore al vettore somma. Si può usare il metodo BLAS.axpy
+    Riscalare il vettore somma per il numero di parole del documento, usando ad esempio il metodo BLAS.scal
+    A questo punto si ottiene il vettore che rappresenta il documento.
+
+    Suggerimento: allenare Word2Vec puo` richiedere tempo. E' consigliato salvare il modello
+    su file dopo averlo allenato usando il metodo save.
+    E' possibile caricare un modello salvato con il metodo load.
+ */
 public class Word2VecOurModel {
     public static void main(String[] args) {
         String dataPath = args[0];
