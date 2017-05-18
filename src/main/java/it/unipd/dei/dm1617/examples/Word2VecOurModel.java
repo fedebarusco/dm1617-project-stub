@@ -1,12 +1,11 @@
 package it.unipd.dei.dm1617.examples;
 
-import it.unipd.dei.dm1617.CountVectorizer;
-import it.unipd.dei.dm1617.InputOutput;
-import it.unipd.dei.dm1617.Lemmatizer;
-import it.unipd.dei.dm1617.WikiPage;
+import it.unipd.dei.dm1617.*;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.mllib.clustering.KMeans;
+import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.feature.Word2Vec;
@@ -16,65 +15,11 @@ import scala.Tuple2;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 
 /**
  * Created by Emanuele on 11/05/2017.
- */
-/*
-    ENG: The purpose and usefulness of Word2vec is to group the vectors
-    of similar words together in vectorspace. That is, it detects
-    similarities mathematically. Word2vec creates vectors that are
-    distributed numerical representations of word features, features
-    such as the context of individual words.
-    Given enough data, usage and contexts, Word2vec can make highly
-    accurate guesses about a word’s meaning based on past appearances.
-    Those guesses can be used to establish a word’s association with
-    other words (e.g. “man” is to “boy” what “woman” is to “girl”),
-    or cluster documents and classify them by topic.
-    The output of the Word2vec neural net is a vocabulary in which
-    each item has a vector attached to it, which can be fed into
-    a deep-learning net or simply queried to detect relationships
-    between words.
-    ITA: Word2vec è una semplice rete neurale artificiale a due strati
-    progettata per elaborare il linguaggio naturale, l'algoritmo
-    richiede in ingresso un corpus e restituisce un insieme di vettori
-    che rappresentano la distribuzione semantica delle parole nel testo.
-    Viene costruito un vettore per ogni parola contenuta nel corpus
-    e ogni parola, rappresentata come un punto nello spazio
-    multidimensionale creato. In questo spazio le parole saranno più
-    vicine se riconosciute come semanticamente più simili.
- */
-/*
-    Word2Vec e` un modello che, dato un corpus di documenti, associa a
-    ogni parola un vettore in uno spazio di dimensionalita` decisa dall'utente.
-    Spark fornisce un'implementazione che funziona come segue.
-    - Dato un dataset di testi, di tipo JavaRDD<String>
-    - Trasformare ogni documento del dataset in una sequenza di token
-      (potenzialmente con qualche ulteriore preprocessing). L'importante e` ottenere
-      un dataset di tipo JavaRDD<Iterable<String>>.
-    - Creare un oggetto di tipo org.apache.spark.mllib.feature.Word2Vec, che va configurato
-      usando i vari metodi "set...".
-    - Una volta configurato l'oggetto Word2Vec, allenare il modello invocando il metodo
-      Word2Vec.fit con argomento il dataset di sequenze di token.
-    - Questa invocazione restituisce un oggetto di tipo Word2VecModel. E' possibile usare
-      questo oggetto per trovare il vettore che rappresenta una data parola usando il
-      metodo transform(String).
-
-    Manca la funzionalita` per trasformare i documenti in vettori usando questo modello.
-    Un modo semplice di farlo e` di trasformare ogni parola di un documento nel vettore
-    corrispondente e poi fare la media:
-
-    Distribuire ai vari worker il modello allenato usando il metodo del broadcast visto a lezione.
-    Per ogni documento, inizializzare il vettore somma usando il metodo statico Vectors.zeros
-    Per ogni parola del documento ottenere il vettore corrispondente usando il metodo transform
-    del modello, e sommare questo vettore al vettore somma. Si può usare il metodo BLAS.axpy
-    Riscalare il vettore somma per il numero di parole del documento, usando ad esempio il metodo BLAS.scal
-    A questo punto si ottiene il vettore che rappresenta il documento.
-
-    Suggerimento: allenare Word2Vec puo` richiedere tempo. E' consigliato salvare il modello
-    su file dopo averlo allenato usando il metodo save.
-    E' possibile caricare un modello salvato con il metodo load.
  */
 public class Word2VecOurModel {
     public static void main(String[] args) {
@@ -127,6 +72,61 @@ public class Word2VecOurModel {
         //Tuple2<String, Object>[] synonyms = model.findSynonyms("age", 5);
         //synonyms.
         model.save(sc.sc(), "datapath");
+
+        JavaRDD<Vector> data = pageAndVector.map(pair -> pair._2());
+
+        // Cluster the data into two classes using KMeans
+        /*
+            Clustering basato su centri e assumendo di sapere quanti cluster vogliamo.
+            Il k-means ha come funzione obiettivo quello di: minimizzare la somma dei quadrati
+            delle distanze di ogni punto dal centro del suo cluster. E' più tollerante al rumore
+            perché il contributo degli outlier viene un po' mascherato dal contributo di tutti
+            gli altri.
+            Problema che studiamo facendo riferimento in particolare al caso Euclideo, cioè
+            al caso in cui i punti siano punti in uno spazio Euclideo di dimensione R^d, in cui
+            si faccia uso della distanza Euclidea. Centroide e permettiamo ai centri dei cluster
+            di non appartenere ai punti iniziali. I centri dei cluster saranno dati dai centroidi,
+            cioè un "punto medio" rispetto all'insieme dei punti del cluster.
+            Il punto medio di un insieme di punti in R^d è dato dalla somma dei punti,
+            vista come somma di vettori, diviso n.
+            Il centroide di un insieme di punti di R^d è quello che minimizza la somma
+            dei quadrati delle distanze di tutti i punti di P.
+            Una volta trovato il clustering, quindi la partizione di punti in k cluster, per ciascun
+            cluster, il miglior centro ai fini della funzione obiettivo di k-means è il centroide.
+        */
+        int numClusters = 100;
+        int numIterations = 20;
+        KMeansModel clusters = KMeans.train( data.rdd(), numClusters, numIterations);
+
+        System.out.println("Cluster centers:");
+        for (Vector center : clusters.clusterCenters()) {
+            System.out.println(" " + center);
+        }
+        // here is what I added to predict data points that are within the clusters
+        List<Integer> L = clusters.predict(data).collect();
+        for (Integer i : L) {
+            System.out.println(i);
+        }
+
+        /*
+            Map delle coppie (pagina, vettore) utilizzando il modello creato prima e il metodo predict
+            che prendendo come argomento il vettore corrispondente alla pagina restituisce il cluster, l'RDD
+            restituita alla fine è la coppia (pagina, indice del cluster corrispondente)
+         */
+        JavaPairRDD<WikiPage, Integer> clustersNew = pageAndVector.mapToPair(pav -> {
+            return new Tuple2<WikiPage, Integer>(pav._1(), clusters.predict(pav._2()));
+        });
+
+        for (Tuple2<WikiPage, Integer> p : clustersNew.collect()) {
+            System.out.println(p._1().getTitle() + ", cluster: " + p._2());
+        }
+
+        // Finally, we print the distance between the first two pages
+        List<Tuple2<WikiPage, Vector>> firstPages = pageAndVector.take(2);
+        double dist = Distance.cosineDistance(firstPages.get(0)._2(), firstPages.get(1)._2());
+        System.out.println("Cosine distance between `" +
+                firstPages.get(0)._1().getTitle() + "` and `" +
+                firstPages.get(1)._1().getTitle() + "` = " + dist);
     }
 
     public static Vector sumVectors(Vector v1, Vector v2){
@@ -138,53 +138,3 @@ public class Word2VecOurModel {
         return Vectors.dense(sum);
     }
 }
-/*
-import org.apache.spark.mllib.feature.{Word2Vec, Word2VecModel}
-
-val input = sc.textFile("data/mllib/sample_lda_data.txt").map(line => line.split(" ").toSeq)
-
-val word2vec = new Word2Vec()
-
-val model = word2vec.fit(input)
-
-val synonyms = model.findSynonyms("1", 5)
-
-for((synonym, cosineSimilarity) <- synonyms) {
-  println(s"$synonym $cosineSimilarity")
-}
-
-// Save and load model
-model.save(sc, "myModelPath")
-val sameModel = Word2VecModel.load(sc, "myModelPath")
-
-log.info("Load & Vectorize Sentences....");
-        // Strip white space before and after for each line
-        SentenceIterator iter = new BasicLineIterator(dataPath);
-
-        log.info("Load data....");
-        SentenceIterator iter = new LineSentenceIterator(new File("/Users/cvn/Desktop/file.txt"));
-        iter.setPreProcessor(new SentencePreProcessor() {
-            @Override
-            public String preProcess(String sentence) {
-                return sentence.toLowerCase();
-            }
-        });
-
-        // Split on white spaces in the line to get words
-        TokenizerFactory t = new DefaultTokenizerFactory();
-        t.setTokenPreProcessor(new CommonPreprocessor());
-
-log.info("Building model....");
-        Word2Vec vec = new Word2Vec.Builder()
-                .minWordFrequency(5)
-                .iterations(1)
-                .layerSize(100)
-                .seed(42)
-                .windowSize(5)
-                .iterate(iter)
-                .tokenizerFactory(t)
-                .build();
-
-        log.info("Fitting Word2Vec model....");
-        vec.fit();
-*/
