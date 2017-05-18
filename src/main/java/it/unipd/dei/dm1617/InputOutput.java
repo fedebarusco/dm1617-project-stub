@@ -32,7 +32,7 @@ public class InputOutput {
    * Project's web page. This is fine, as Spark can deal transparently
    * with directories containing datasets split in several files. In
    * particular, a dataset written to dis with this write function can be
-   * loaded using the read function defined above
+   * loaded using the read function defined above.
    */
   public static void write(JavaRDD<WikiPage> rdd, String path) {
     new SparkSession(rdd.context())
