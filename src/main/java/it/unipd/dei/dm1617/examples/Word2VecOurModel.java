@@ -82,8 +82,8 @@ public class Word2VecOurModel {
         System.out.println();
         //Tuple2<String, Object>[] synonyms = model.findSynonyms("age", 5);
         //synonyms.
-        String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\";
-        model.save(sc.sc(), path_model);
+        //String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\";
+        //model.save(sc.sc(), path_model);
 
         JavaRDD<Vector> data = pageAndVector.map(pair -> pair._2());
 
