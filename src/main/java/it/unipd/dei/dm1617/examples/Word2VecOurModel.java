@@ -70,7 +70,7 @@ public class Word2VecOurModel {
                     docvec = sumVectors(tmp,docvec);
                 }
             }
-            System.out.println(i);
+            System.out.println("Parole perse perchè non contenute nel vocabolario di scala:" + i);
             //i=0;
             return new Tuple2<WikiPage,Vector>(pair._1(),docvec);
         });
@@ -82,7 +82,8 @@ public class Word2VecOurModel {
         System.out.println();
         //Tuple2<String, Object>[] synonyms = model.findSynonyms("age", 5);
         //synonyms.
-        model.save(sc.sc(), "datapath");
+        String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\";
+        model.save(sc.sc(), path_model);
 
         JavaRDD<Vector> data = pageAndVector.map(pair -> pair._2());
 
