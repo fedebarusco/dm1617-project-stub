@@ -1,6 +1,5 @@
 package it.unipd.dei.dm1617;
 
-
 import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.mllib.linalg.Vector;
 

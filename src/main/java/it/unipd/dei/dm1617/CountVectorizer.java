@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 
 /**
  * Tool to convert a collection of text documents into a collection of
- * vectors of token counts. Further details on this process are
+ * vectors of token counts. xFurther details on this process are
  * provided here:
  * https://nlp.stanford.edu/IR-book/html/htmledition/term-frequency-and-weighting-1.html
  *
