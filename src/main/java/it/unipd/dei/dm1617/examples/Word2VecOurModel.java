@@ -7,8 +7,6 @@ import it.unipd.dei.dm1617.WikiPage;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.mllib.clustering.KMeans;
-import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.feature.Word2Vec;
@@ -19,6 +17,10 @@ import scala.Tuple2;
 import java.io.File;
 import java.util.ArrayList;
 
+
+/**
+ * Created by Emanuele on 11/05/2017.
+ */
 public class Word2VecOurModel {
     public static void main(String[] args) {
         String dataPath = args[0];
@@ -48,6 +50,7 @@ public class Word2VecOurModel {
                 .setVectorSize(100)
                 .fit(lemmas);
 
+
         JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
             Vector docvec = null;
             for(String lemma : pair._2()){
@@ -61,21 +64,14 @@ public class Word2VecOurModel {
             return new Tuple2<WikiPage,Vector>(pair._1(),docvec);
         });
 
-        int i = 0;
         for(Tuple2<WikiPage, Vector> el : pageAndVector.collect()){
             System.out.println(el._1().getTitle());
             System.out.println(el._2());
         }
         System.out.println();
-
+        //Tuple2<String, Object>[] synonyms = model.findSynonyms("age", 5);
+        //synonyms.
         model.save(sc.sc(), "datapath");
-
-        //JavaRDD<Vector> data = pageAndVector.map();
-
-        // Cluster the data into two classes using KMeans
-        int numClusters = 100;
-        int numIterations = 20;
-        //KMeansModel clusters = KMeans.train(data.rdd(), numClusters, numIterations);
     }
 
     public static Vector sumVectors(Vector v1, Vector v2){
@@ -87,3 +83,53 @@ public class Word2VecOurModel {
         return Vectors.dense(sum);
     }
 }
+/*
+import org.apache.spark.mllib.feature.{Word2Vec, Word2VecModel}
+
+val input = sc.textFile("data/mllib/sample_lda_data.txt").map(line => line.split(" ").toSeq)
+
+val word2vec = new Word2Vec()
+
+val model = word2vec.fit(input)
+
+val synonyms = model.findSynonyms("1", 5)
+
+for((synonym, cosineSimilarity) <- synonyms) {
+  println(s"$synonym $cosineSimilarity")
+}
+
+// Save and load model
+model.save(sc, "myModelPath")
+val sameModel = Word2VecModel.load(sc, "myModelPath")
+
+log.info("Load & Vectorize Sentences....");
+        // Strip white space before and after for each line
+        SentenceIterator iter = new BasicLineIterator(dataPath);
+
+        log.info("Load data....");
+        SentenceIterator iter = new LineSentenceIterator(new File("/Users/cvn/Desktop/file.txt"));
+        iter.setPreProcessor(new SentencePreProcessor() {
+            @Override
+            public String preProcess(String sentence) {
+                return sentence.toLowerCase();
+            }
+        });
+
+        // Split on white spaces in the line to get words
+        TokenizerFactory t = new DefaultTokenizerFactory();
+        t.setTokenPreProcessor(new CommonPreprocessor());
+
+log.info("Building model....");
+        Word2Vec vec = new Word2Vec.Builder()
+                .minWordFrequency(5)
+                .iterations(1)
+                .layerSize(100)
+                .seed(42)
+                .windowSize(5)
+                .iterate(iter)
+                .tokenizerFactory(t)
+                .build();
+
+        log.info("Fitting Word2Vec model....");
+        vec.fit();
+*/
