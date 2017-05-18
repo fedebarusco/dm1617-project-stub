@@ -7,6 +7,8 @@ import it.unipd.dei.dm1617.WikiPage;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.mllib.clustering.KMeans;
+import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.feature.Word2Vec;
@@ -72,6 +74,10 @@ public class Word2VecOurModel {
         //Tuple2<String, Object>[] synonyms = model.findSynonyms("age", 5);
         //synonyms.
         model.save(sc.sc(), "datapath");
+
+        int numClusters = 100;
+        int numIterations = 20;
+        //KMeansModel clusters = KMeans.train(tfidf.rdd(), numClusters, numIterations);
     }
 
     public static Vector sumVectors(Vector v1, Vector v2){
