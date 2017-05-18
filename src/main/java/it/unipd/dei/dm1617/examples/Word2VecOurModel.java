@@ -50,17 +50,28 @@ public class Word2VecOurModel {
                 .setVectorSize(100)
                 .fit(lemmas);
 
-
         JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
+            int i = 0;
             Vector docvec = null;
             for(String lemma : pair._2()){
-                Vector tmp = model.transform(lemma);
+                Vector tmp;
+                try{
+                    tmp = model.transform(lemma);
+                }
+                catch (java.lang.IllegalStateException e){
+                    i++;
+                    continue;
+                    //tmp = null;
+                    //System.out.println(e);
+                }
                 if(docvec==null){
                     docvec = tmp;
                 }else{
                     docvec = sumVectors(tmp,docvec);
                 }
             }
+            System.out.println(i);
+            //i=0;
             return new Tuple2<WikiPage,Vector>(pair._1(),docvec);
         });
 
