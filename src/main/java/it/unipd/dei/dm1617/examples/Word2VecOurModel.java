@@ -46,23 +46,25 @@ public class Word2VecOurModel {
 
         Word2Vec word2vec = new Word2Vec();
 
+        //per ogni categoria vedere in quanti cluster è spezzata
         Word2VecModel model = word2vec
                 .setVectorSize(100)
+                //.setMinCount(0) // il default è 5 se si vuole lasciare 5 bisogna levare le pagine che danno problemi
                 .fit(lemmas);
 
         JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
             int i = 0;
             Vector docvec = null;
             for(String lemma : pair._2()){
-                Vector tmp;
+                Vector tmp = null;
                 try{
                     tmp = model.transform(lemma);
                 }
                 catch (java.lang.IllegalStateException e){
                     i++;
+                    tmp = null;
+                    System.out.println(e);
                     continue;
-                    //tmp = null;
-                    //System.out.println(e);
                 }
                 if(docvec==null){
                     docvec = tmp;
@@ -74,6 +76,13 @@ public class Word2VecOurModel {
             //i=0;
             return new Tuple2<WikiPage,Vector>(pair._1(),docvec);
         });
+
+        //pageAndVector.filter(pair -> pair._2 != null);
+        pageAndVector.filter(pair -> {
+            return (pair._2() != null);
+        }).cache();
+        // provare vari valori di k e vedere la qualità del cluster
+        //influenza di k sul clustering
 
         for(Tuple2<WikiPage, Vector> el : pageAndVector.collect()){
             System.out.println(el._1().getTitle());
