@@ -9,15 +9,18 @@ import org.apache.spark.mllib.clustering.KMeans;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.feature.IDF;
 import org.apache.spark.mllib.linalg.Vector;
+import scala.Serializable;
 import scala.Tuple2;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 /**
  * Example program to show the basic usage of some Spark utilities.
  */
 public class TfIdfTransformation {
+
 
     public static void main(String[] args) {
         String dataPath = args[0];
@@ -130,28 +133,32 @@ public class TfIdfTransformation {
         // Note that we are using `mapToPair` instead of `map`, since
         // it returns a `JavaPairRDD` object, which has methods specialized
         // to work on key-value pairs, like the `reduceByKey` operation we use here.
-      /*  JavaPairRDD<String[], Integer> dCounts = cat
+         JavaPairRDD<String[], Integer> dCounts = cat
                 .mapToPair((w) -> new Tuple2<>(w, 1))
                 .reduceByKey((x, y) -> x + y);
-        class tupleComparator implements Comparable, Serializable {
 
+
+
+        class TupleComparator implements Comparator<Tuple2<String, Integer>>, Serializable {
             @Override
-            public int compareTo(Object o) {
-                return 0;
+            public int compare(Tuple2<String, Integer> t1, Tuple2<String, Integer> t2) {
+                return t1._2().compareTo(t2._2());
             }
         }
+
+
         // Instead of sorting and collecting _all_ the values on the master
         // machine, we take only the top 100 words by count.
         // In general this operation is safer, since we can bound the number
         // of elements that are collected by the master, thus avoiding OutOfMemory errors
-        List<Tuple2<String[], Integer>> lTopCounts = dCounts.top(100, (t1, t2) -> t1._2().tupleComparator(t2._2()));
+        List<Tuple2<String[], Integer>> lTopCounts = dCounts.top(vocabularySize, new TupleComparator());
         lTopCounts.forEach((tuple) -> {
             String[] word = tuple._1();
             int count = tuple._2();
             System.out.println(word + " :: " + count);
         });
 
-*/
+
 
 
 
