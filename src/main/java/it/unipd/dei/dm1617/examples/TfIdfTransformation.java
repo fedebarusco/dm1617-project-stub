@@ -107,6 +107,58 @@ public class TfIdfTransformation {
                 firstPages.get(1)._1().getTitle() + "` = " + dist);
 
 
+
+
+        // Categorie dovete morire!!!
+
+
+        // Get text out of pages
+        JavaRDD<String[]> cat = pages.map((p) -> p.getCategories());
+
+        List<String[]> catlist = cat.collect();
+        int idx = 0;
+        for(String[] list : catlist){
+            System.out.println("Cats of doc" + idx++);
+            for(String c : list){
+                System.out.println(c);
+            }
+            System.out.println();
+        }
+
+
+        // Now we can apply the MR algorithm for word count.
+        // Note that we are using `mapToPair` instead of `map`, since
+        // it returns a `JavaPairRDD` object, which has methods specialized
+        // to work on key-value pairs, like the `reduceByKey` operation we use here.
+      /*  JavaPairRDD<String[], Integer> dCounts = cat
+                .mapToPair((w) -> new Tuple2<>(w, 1))
+                .reduceByKey((x, y) -> x + y);
+        class tupleComparator implements Comparable, Serializable {
+
+            @Override
+            public int compareTo(Object o) {
+                return 0;
+            }
+        }
+        // Instead of sorting and collecting _all_ the values on the master
+        // machine, we take only the top 100 words by count.
+        // In general this operation is safer, since we can bound the number
+        // of elements that are collected by the master, thus avoiding OutOfMemory errors
+        List<Tuple2<String[], Integer>> lTopCounts = dCounts.top(100, (t1, t2) -> t1._2().tupleComparator(t2._2()));
+        lTopCounts.forEach((tuple) -> {
+            String[] word = tuple._1();
+            int count = tuple._2();
+            System.out.println(word + " :: " + count);
+        });
+
+*/
+
+
+
+
+
+
+
     }
 
 }
