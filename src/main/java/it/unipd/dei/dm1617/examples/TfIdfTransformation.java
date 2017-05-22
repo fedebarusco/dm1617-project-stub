@@ -1,27 +1,18 @@
 package it.unipd.dei.dm1617.examples;
 
-
 import it.unipd.dei.dm1617.*;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.*;
 import org.apache.spark.mllib.clustering.KMeans;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.feature.IDF;
-import org.apache.spark.mllib.feature.Word2Vec;
 import org.apache.spark.mllib.linalg.Vector;
-import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
-import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
-import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
-import scala.Array;
-import scala.Serializable;
 import scala.Tuple2;
 
-import java.util.*;
-
-import static java.awt.SystemColor.text;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Example program to show the basic usage of some Spark utilities.
@@ -35,7 +26,7 @@ public class TfIdfTransformation {
         SparkConf conf = new SparkConf(true).setAppName("Tf-Ifd transformation");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
-        // Load dataset of pages INPUT
+        // Load dataset of pages
         JavaRDD<WikiPage> pages = InputOutput.read(sc, dataPath);
 
         // Get text out of pages
@@ -56,7 +47,7 @@ public class TfIdfTransformation {
         //  - the transformed dataset.
         //
         // In this case we also cache the dataset because the next step,
-        // IDF, will perform two passes over it.  TRASDORMA LE FRASI IN VETTORI DI DIMENSIONE 100
+        // IDF, will perform two passes over it.
         JavaRDD<Vector> tf = new CountVectorizer()
                 .setVocabularySize(100)
                 .transform(lemmas)
@@ -116,49 +107,6 @@ public class TfIdfTransformation {
                 firstPages.get(1)._1().getTitle() + "` = " + dist);
 
 
+    }
 
-
-        // Categorie dovete morire!!!
-
-
-        // Get text out of pages
-        JavaRDD<String[]> cat = pages.map((p) -> p.getCategories());
-
-        List<String[]> catlist = cat.collect();
-        int idx = 0;
-        for(String[] list : catlist){
-            System.out.println("Cats of doc" + idx++);
-            for(String c : list){
-                System.out.println(c);
-            }
-            System.out.println();
-        }
-
-/*
-         // Now we can apply the MR algorithm for word count.
-        // Note that we are using `mapToPair` instead of `map`, since
-        // it returns a `JavaPairRDD` object, which has methods specialized
-        // to work on key-value pairs, like the `reduceByKey` operation we use here.
-       JavaPairRDD<String[], Integer> dCounts = cat
-                .mapToPair((w) -> new Tuple2<>(w, 1))
-                .reduceByKey((x, y) -> x + y);
- class tupleComparator implements Comparable, Serializable {
-
-     @Override
-     public int compareTo(Object o) {
-         return 0;
-     }
- }
-        // Instead of sorting and collecting _all_ the values on the master
-        // machine, we take only the top 100 words by count.
-        // In general this operation is safer, since we can bound the number
-        // of elements that are collected by the master, thus avoiding OutOfMemory errors
-        List<Tuple2<String[], Integer>> lTopCounts = dCounts.top(100, (t1, t2) -> t1._2().tupleComparator(t2._2()));
-        lTopCounts.forEach((tuple) -> {
-            String[] word = tuple._1();
-            int count = tuple._2();
-            System.out.println(word + " :: " + count);
-        });
-*/
-
-    }}
+}
