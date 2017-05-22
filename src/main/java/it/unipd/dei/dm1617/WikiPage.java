@@ -20,7 +20,7 @@ public class WikiPage implements Serializable {
     return Encoders.bean(WikiPage.class);
   }
 
-  private long id;
+  private long id; //64 bit signed integer
 
   private String title;
 
