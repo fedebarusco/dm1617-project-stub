@@ -18,9 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-/**
- * Created by Emanuele on 11/05/2017.
- */
 public class Word2VecOurModel {
     public static void main(String[] args) {
         String dataPath = args[0];
@@ -49,7 +46,7 @@ public class Word2VecOurModel {
         //per ogni categoria vedere in quanti cluster è spezzata
         Word2VecModel model = word2vec
                 .setVectorSize(100)
-                //.setMinCount(0) // il default è 5 se si vuole lasciare 5 bisogna levare le pagine che danno problemi
+                .setMinCount(2) // il default è 5 se si vuole lasciare 5 bisogna levare le pagine che danno problemi
                 .fit(lemmas);
 
         JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
@@ -78,8 +75,8 @@ public class Word2VecOurModel {
         });
 
         //pageAndVector.filter(pair -> pair._2 != null);
-        pageAndVector.filter(pair -> {
-            return (pair._2() != null);
+        pageAndVector = pageAndVector.filter(pair -> {
+            return pair != null && pair._2() != null && pair._1() != null;
         }).cache();
         // provare vari valori di k e vedere la qualità del cluster
         //influenza di k sul clustering
