@@ -138,7 +138,7 @@ public class TfIdfTransformation {
                 .reduceByKey((x, y) -> x + y);
 
 
-
+/*
         class TupleComparator implements Comparator<Tuple2<String, Integer>>, Serializable {
             @Override
             public int compare(Tuple2<String, Integer> t1, Tuple2<String, Integer> t2) {
@@ -158,7 +158,7 @@ public class TfIdfTransformation {
             System.out.println(word + " :: " + count);
         });
 
-
+*/
 
 
 
