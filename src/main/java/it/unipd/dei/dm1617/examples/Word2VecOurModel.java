@@ -46,6 +46,7 @@ public class Word2VecOurModel {
         //per ogni categoria vedere in quanti cluster è spezzata
         Word2VecModel model = word2vec
                 .setVectorSize(100)
+                //nel modello consideriamo solo le parole che si ripetono più di 2 volte (>=2) questo per la legge di Zipf (da approfondire)
                 .setMinCount(2) // il default è 5 se si vuole lasciare 5 bisogna levare le pagine che danno problemi
                 .fit(lemmas);
 
