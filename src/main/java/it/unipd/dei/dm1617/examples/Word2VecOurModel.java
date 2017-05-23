@@ -16,6 +16,7 @@ import scala.Tuple2;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 public class Word2VecOurModel {
@@ -139,7 +140,13 @@ public class Word2VecOurModel {
             System.out.println(p._1().getTitle() + ", cluster: " + p._2());
         }
 */
-        Analyzer.getCategoriesDistribution(clustersNew);
+        JavaPairRDD<Integer, List<String>> groupedCategoriesByCluster = Analyzer.getCategoriesDistribution(clustersNew);
+        for (Map.Entry<Integer, List<String>> e : groupedCategoriesByCluster.collectAsMap().entrySet()) {
+            int clusterId = e.getKey();
+            List<String> categories = e.getValue();
+            System.out.println(categories.size() + " distinct categories found in cluster " + clusterId);
+        }
+
         // Finally, we print the distance between the first two pages
         List<Tuple2<WikiPage, Vector>> firstPages = pageAndVector.take(2);
         double dist = Distance.cosineDistance(firstPages.get(0)._2(), firstPages.get(1)._2());
