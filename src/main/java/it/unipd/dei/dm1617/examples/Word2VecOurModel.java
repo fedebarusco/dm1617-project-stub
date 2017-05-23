@@ -16,11 +16,9 @@ import scala.Tuple2;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
-/**
- * Created by Emanuele on 11/05/2017.
- */
 public class Word2VecOurModel {
     public static void main(String[] args) {
         String dataPath = args[0];
@@ -49,42 +47,42 @@ public class Word2VecOurModel {
         //per ogni categoria vedere in quanti cluster è spezzata
         Word2VecModel model = word2vec
                 .setVectorSize(100)
-                //.setMinCount(0) // il default è 5 se si vuole lasciare 5 bisogna levare le pagine che danno problemi
+                //nel modello consideriamo solo le parole che si ripetono più di 2 volte (>=2) questo per la legge di Zipf (da approfondire)
+                .setMinCount(2) // il default è 5 se si vuole lasciare 5 bisogna levare le pagine che danno problemi
                 .fit(lemmas);
 
         JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
             int i = 0;
             Vector docvec = null;
-            for(String lemma : pair._2()){
+            for (String lemma : pair._2()) {
                 Vector tmp = null;
-                try{
+                try {
                     tmp = model.transform(lemma);
-                }
-                catch (java.lang.IllegalStateException e){
+                } catch (java.lang.IllegalStateException e) {
                     i++;
                     tmp = null;
                     System.out.println(e);
                     continue;
                 }
-                if(docvec==null){
+                if (docvec == null) {
                     docvec = tmp;
-                }else{
-                    docvec = sumVectors(tmp,docvec);
+                } else {
+                    docvec = sumVectors(tmp, docvec);
                 }
             }
             System.out.println("Parole perse perchè non contenute nel vocabolario di scala:" + i);
             //i=0;
-            return new Tuple2<WikiPage,Vector>(pair._1(),docvec);
+            return new Tuple2<WikiPage, Vector>(pair._1(), docvec);
         });
 
         //pageAndVector.filter(pair -> pair._2 != null);
-        pageAndVector.filter(pair -> {
-            return (pair._2() != null);
+        pageAndVector = pageAndVector.filter(pair -> {
+            return pair != null && pair._2() != null && pair._1() != null;
         }).cache();
         // provare vari valori di k e vedere la qualità del cluster
         //influenza di k sul clustering
 
-        for(Tuple2<WikiPage, Vector> el : pageAndVector.collect()){
+        for (Tuple2<WikiPage, Vector> el : pageAndVector.collect()) {
             System.out.println(el._1().getTitle());
             System.out.println(el._2());
         }
@@ -117,7 +115,7 @@ public class Word2VecOurModel {
         */
         int numClusters = 100;
         int numIterations = 20;
-        KMeansModel clusters = KMeans.train( data.rdd(), numClusters, numIterations);
+        KMeansModel clusters = KMeans.train(data.rdd(), numClusters, numIterations);
 
         System.out.println("Cluster centers:");
         for (Vector center : clusters.clusterCenters()) {
@@ -137,9 +135,16 @@ public class Word2VecOurModel {
         JavaPairRDD<WikiPage, Integer> clustersNew = pageAndVector.mapToPair(pav -> {
             return new Tuple2<WikiPage, Integer>(pav._1(), clusters.predict(pav._2()));
         });
-
+/*
         for (Tuple2<WikiPage, Integer> p : clustersNew.collect()) {
             System.out.println(p._1().getTitle() + ", cluster: " + p._2());
+        }
+*/
+        JavaPairRDD<Integer, List<String>> groupedCategoriesByCluster = Analyzer.getCategoriesDistribution(clustersNew);
+        for (Map.Entry<Integer, List<String>> e : groupedCategoriesByCluster.collectAsMap().entrySet()) {
+            int clusterId = e.getKey();
+            List<String> categories = e.getValue();
+            System.out.println(categories.size() + " distinct categories found in cluster " + clusterId);
         }
 
         // Finally, we print the distance between the first two pages
@@ -150,11 +155,11 @@ public class Word2VecOurModel {
                 firstPages.get(1)._1().getTitle() + "` = " + dist);
     }
 
-    public static Vector sumVectors(Vector v1, Vector v2){
+    public static Vector sumVectors(Vector v1, Vector v2) {
         int size = v1.toArray().length;
         double[] sum = new double[size];
-        for(int i = 0; i < size; i++){
-            sum[i]=v1.toArray()[i] + v2.toArray()[i];
+        for (int i = 0; i < size; i++) {
+            sum[i] = v1.toArray()[i] + v2.toArray()[i];
         }
         return Vectors.dense(sum);
     }
