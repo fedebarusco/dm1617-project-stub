@@ -8,6 +8,9 @@ public class Distance {
   /**
    * Cosine distance between vectors where all the elements are positive.
    */
+  /*
+    Per la distanza tra documenti si usa molto anche
+   */
   public static double cosineDistance(Vector a, Vector b) {
     if (a.size() != b.size()) {
       throw new IllegalArgumentException("Vectors should be in the same space");

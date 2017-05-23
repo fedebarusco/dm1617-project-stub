@@ -53,26 +53,25 @@ public class Word2VecOurModel {
         JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
             int i = 0;
             Vector docvec = null;
-            for(String lemma : pair._2()){
+            for (String lemma : pair._2()) {
                 Vector tmp = null;
-                try{
+                try {
                     tmp = model.transform(lemma);
-                }
-                catch (java.lang.IllegalStateException e){
+                } catch (java.lang.IllegalStateException e) {
                     i++;
                     tmp = null;
                     System.out.println(e);
                     continue;
                 }
-                if(docvec==null){
+                if (docvec == null) {
                     docvec = tmp;
-                }else{
-                    docvec = sumVectors(tmp,docvec);
+                } else {
+                    docvec = sumVectors(tmp, docvec);
                 }
             }
             System.out.println("Parole perse perchè non contenute nel vocabolario di scala:" + i);
             //i=0;
-            return new Tuple2<WikiPage,Vector>(pair._1(),docvec);
+            return new Tuple2<WikiPage, Vector>(pair._1(), docvec);
         });
 
         //pageAndVector.filter(pair -> pair._2 != null);
@@ -82,7 +81,7 @@ public class Word2VecOurModel {
         // provare vari valori di k e vedere la qualità del cluster
         //influenza di k sul clustering
 
-        for(Tuple2<WikiPage, Vector> el : pageAndVector.collect()){
+        for (Tuple2<WikiPage, Vector> el : pageAndVector.collect()) {
             System.out.println(el._1().getTitle());
             System.out.println(el._2());
         }
@@ -115,7 +114,7 @@ public class Word2VecOurModel {
         */
         int numClusters = 100;
         int numIterations = 20;
-        KMeansModel clusters = KMeans.train( data.rdd(), numClusters, numIterations);
+        KMeansModel clusters = KMeans.train(data.rdd(), numClusters, numIterations);
 
         System.out.println("Cluster centers:");
         for (Vector center : clusters.clusterCenters()) {
@@ -135,11 +134,12 @@ public class Word2VecOurModel {
         JavaPairRDD<WikiPage, Integer> clustersNew = pageAndVector.mapToPair(pav -> {
             return new Tuple2<WikiPage, Integer>(pav._1(), clusters.predict(pav._2()));
         });
-
+/*
         for (Tuple2<WikiPage, Integer> p : clustersNew.collect()) {
             System.out.println(p._1().getTitle() + ", cluster: " + p._2());
         }
-
+*/
+        Analyzer.getCategoriesDistribution(clustersNew);
         // Finally, we print the distance between the first two pages
         List<Tuple2<WikiPage, Vector>> firstPages = pageAndVector.take(2);
         double dist = Distance.cosineDistance(firstPages.get(0)._2(), firstPages.get(1)._2());
@@ -148,11 +148,11 @@ public class Word2VecOurModel {
                 firstPages.get(1)._1().getTitle() + "` = " + dist);
     }
 
-    public static Vector sumVectors(Vector v1, Vector v2){
+    public static Vector sumVectors(Vector v1, Vector v2) {
         int size = v1.toArray().length;
         double[] sum = new double[size];
-        for(int i = 0; i < size; i++){
-            sum[i]=v1.toArray()[i] + v2.toArray()[i];
+        for (int i = 0; i < size; i++) {
+            sum[i] = v1.toArray()[i] + v2.toArray()[i];
         }
         return Vectors.dense(sum);
     }

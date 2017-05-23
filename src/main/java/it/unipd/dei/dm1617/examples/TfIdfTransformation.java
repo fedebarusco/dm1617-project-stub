@@ -151,7 +151,7 @@ public class TfIdfTransformation {
         // machine, we take only the top 100 words by count.
         // In general this operation is safer, since we can bound the number
         // of elements that are collected by the master, thus avoiding OutOfMemory errors
-        List<Tuple2<String[], Integer>> lTopCounts = dCounts.top(vocabularySize, new TupleComparator());
+        List<Tuple2<String[], Integer>> lTopCounts = dCounts.top(500, new TupleComparator());
         lTopCounts.forEach((tuple) -> {
             String[] word = tuple._1();
             int count = tuple._2();
