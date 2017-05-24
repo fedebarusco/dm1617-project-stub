@@ -134,7 +134,7 @@ public class TfIdfTransformation {
         int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
         System.out.println("numero di categorie totali distinte:" + size);
 
-        //media di categorie presenti in ciascun cluster
+        //media di categorie (con ripetizioni) presenti in ciascun cluster
         int size_c = size_categories.size();
         double average = size_c/clusters.k();
         System.out.println("categorie (con ripetizioni) presenti nei cluster: " + size_c);
