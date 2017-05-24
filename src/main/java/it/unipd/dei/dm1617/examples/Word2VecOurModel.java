@@ -164,10 +164,12 @@ public class Word2VecOurModel {
 
 
         //categorie per cluster
+        ArrayList<Integer> size_categories = new ArrayList<>();
         JavaPairRDD<Integer, List<String>> groupedCategoriesByCluster = Analyzer.getCategoriesDistribution(clustersNew);
         for (Map.Entry<Integer, List<String>> e : groupedCategoriesByCluster.collectAsMap().entrySet()) {
             int clusterId = e.getKey();
             List<String> categories = e.getValue();
+            size_categories.add(categories.size());
             System.out.println(categories.size() + " distinct categories found in cluster " + clusterId);
         }
 
@@ -176,8 +178,10 @@ public class Word2VecOurModel {
         System.out.println("numero di categorie totali distinte:" + size);
 
         //media di categorie presenti in ciascun cluster
-        double average = size/clusters.k();
-        System.out.println("k dovrebbe essere 100: " + clusters.k());
+        int size_c = size_categories.size();
+        double average = size_c/clusters.k();
+        System.out.println("categorie (con ripetizioni) presenti nei cluster: " + size_c);
+        System.out.println("k: " + clusters.k());
         System.out.println("media di categorie presenti in ciascun cluster: " + average);
 
         //per ciascuna categoria restituisco in quanti cluster si trova
