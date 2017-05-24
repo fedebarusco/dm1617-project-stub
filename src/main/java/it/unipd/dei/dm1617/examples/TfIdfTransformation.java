@@ -141,9 +141,6 @@ public class TfIdfTransformation {
         System.out.println("k: " + clusters.k());
         System.out.println("media di categorie presenti in ciascun cluster: " + average);
 
-        //per ciascuna categoria restituisco in quanti cluster si trova
-        //work in progress
-
         /*
         for (Tuple2<WikiPage, Integer> p : clustersNew.collect()) {
             System.out.println(p._1().getTitle() + ", cluster: " + p._2());

@@ -184,10 +184,6 @@ public class Word2VecOurModel {
         System.out.println("k: " + clusters.k());
         System.out.println("media di categorie presenti in ciascun cluster: " + average);
 
-        //per ciascuna categoria restituisco in quanti cluster si trova
-        //work in progress
-
-
         // Finally, we print the distance between the first two pages
         List<Tuple2<WikiPage, Vector>> firstPages = pageAndVector.take(2);
         double dist = Distance.cosineDistance(firstPages.get(0)._2(), firstPages.get(1)._2());
