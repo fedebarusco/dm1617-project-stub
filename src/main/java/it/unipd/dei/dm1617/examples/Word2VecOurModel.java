@@ -154,6 +154,15 @@ public class Word2VecOurModel {
             System.out.println(p._1().getTitle() + ", cluster: " + p._2());
         }
 */
+        //compute in how many clusters a category is split
+        JavaPairRDD<String, List<Integer>> tmp = Analyzer.getNumberOfClustersPerCat(clustersNew);
+        for (Map.Entry<String, List<Integer>> e : tmp.collectAsMap().entrySet()) {
+            String cat = e.getKey();
+            List<Integer> clustersList = e.getValue();
+            System.out.println("Category \"" + cat + "\" was found in " + clustersList.size() + " clusters.");
+        }
+
+
         //categorie per cluster
         JavaPairRDD<Integer, List<String>> groupedCategoriesByCluster = Analyzer.getCategoriesDistribution(clustersNew);
         for (Map.Entry<Integer, List<String>> e : groupedCategoriesByCluster.collectAsMap().entrySet()) {
