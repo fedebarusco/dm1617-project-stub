@@ -166,6 +166,13 @@ public class Word2VecOurModel {
         int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
         System.out.println("numero di categorie totali distinte:" + size);
 
+        //media di categorie presenti in ciascun cluster
+        double average = size/clusters.k();
+        System.out.println("k dovrebbe essere 100: " + clusters.k());
+        System.out.println("media di categorie presenti in ciascun cluster: " + average);
+
+        //per ciascuna categoria restituisco in quanti cluster si trova
+        //work in progress
 
 
         // Finally, we print the distance between the first two pages

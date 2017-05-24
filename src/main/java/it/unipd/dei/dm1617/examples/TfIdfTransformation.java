@@ -120,6 +120,18 @@ public class TfIdfTransformation {
             System.out.println(categories.size() + " distinct categories found in cluster " + clusterId);
         }
 
+        //numero categorie distinte
+        int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
+        System.out.println("numero di categorie totali distinte:" + size);
+
+        //media di categorie presenti in ciascun cluster
+        double average = size/clusters.k();
+        System.out.println("k dovrebbe essere 100: " + clusters.k());
+        System.out.println("media di categorie presenti in ciascun cluster: " + average);
+
+        //per ciascuna categoria restituisco in quanti cluster si trova
+        //work in progress
+
         /*
         for (Tuple2<WikiPage, Integer> p : clustersNew.collect()) {
             System.out.println(p._1().getTitle() + ", cluster: " + p._2());
@@ -131,11 +143,6 @@ public class TfIdfTransformation {
         System.out.println("Cosine distance between `" +
                 firstPages.get(0)._1().getTitle() + "` and `" +
                 firstPages.get(1)._1().getTitle() + "` = " + dist);
-
-
-
-
-        // Categorie dovete morire!!!
 
 
         // Get text out of pages
@@ -182,13 +189,6 @@ public class TfIdfTransformation {
         });
 
 */
-
-
-
-
-
-
-
     }
 
 }
