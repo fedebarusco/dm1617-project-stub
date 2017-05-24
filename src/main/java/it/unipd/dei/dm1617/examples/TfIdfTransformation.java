@@ -14,10 +14,7 @@ import org.apache.spark.mllib.linalg.Vector;
 import scala.Serializable;
 import scala.Tuple2;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Example program to show the basic usage of some Spark utilities.
