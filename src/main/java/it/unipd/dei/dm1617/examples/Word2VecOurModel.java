@@ -123,9 +123,9 @@ public class Word2VecOurModel {
         }
         // here is what I added to predict data points that are within the clusters
         List<Integer> L = clusters.predict(data).collect();
-        for (Integer i : L) {
+        /*for (Integer i : L) {
             System.out.println(i);
-        }
+        }*/
 
         /*
             Map delle coppie (pagina, vettore) utilizzando il modello creato prima e il metodo predict

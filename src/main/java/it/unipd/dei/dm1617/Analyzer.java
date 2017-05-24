@@ -7,6 +7,26 @@ import scala.Tuple2;
 import java.util.*;
 
 public class Analyzer {
+    public static JavaPairRDD<String, List<Integer>> getNumberOfClustersPerCat(JavaPairRDD<WikiPage, Integer> clusters) {
+        return clusters.flatMapToPair((PairFlatMapFunction<Tuple2<WikiPage, Integer>, String, List<Integer>>) pv -> {
+            List<Tuple2<String, List<Integer>>> tmpCats = new ArrayList<>();
+            List<Integer> tmpclusters = new ArrayList<>();
+            for (String c : pv._1().getCategories()) {
+                tmpclusters.add(pv._2());
+                tmpCats.add(new Tuple2(c, tmpclusters));
+            }
+            return tmpCats.iterator();
+        }).reduceByKey((c1, c2) -> {
+            Set<Integer> l = new HashSet<>();
+
+            l.addAll(c1);
+            l.addAll(c2);
+
+            List<Integer> retval = new ArrayList<>();
+            retval.addAll(l);
+            return retval;
+        });
+    }
 
     public static JavaPairRDD<String, Integer> getCategoriesFrequencies(JavaPairRDD<WikiPage, Integer> clusters) {
         return clusters.flatMapToPair((PairFlatMapFunction<Tuple2<WikiPage, Integer>, String, Integer>) pv -> {

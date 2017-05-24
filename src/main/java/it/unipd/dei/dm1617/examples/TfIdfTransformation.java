@@ -87,9 +87,9 @@ public class TfIdfTransformation {
         }
         // here is what I added to predict data points that are within the clusters
         List<Integer> L = clusters.predict(tfidf).collect();
-        for (Integer i : L) {
+        /*for (Integer i : L) {
             System.out.println(i);
-        }
+        }*/
 
         /* Map delle coppie (pag, vettore) utilizzando il modello creato prima e il metodo predict
         che prendendo come argomento il vettore corrispondente alla pg restituisce il cluster, l'RDD
@@ -99,6 +99,18 @@ public class TfIdfTransformation {
             return new Tuple2<WikiPage, Integer>(pav._1(), clusters.predict(pav._2()));
         });
 
+
+        //see in how many clusters a category appears
+        JavaPairRDD<String, List<Integer>> tmp = Analyzer.getNumberOfClustersPerCat(clustersNew);
+        for (Map.Entry<String, List<Integer>> e : tmp.collectAsMap().entrySet()) {
+            String category = e.getKey();
+            List<Integer> categories = e.getValue();
+            System.out.println("Category \"" + category + "\" found in " + categories.size() + " clusters.");
+        }
+
+        System.exit(0);
+
+        
         JavaPairRDD<Integer, List<String>> groupedCategoriesByCluster = Analyzer.getCategoriesDistribution(clustersNew);
         for (Map.Entry<Integer, List<String>> e : groupedCategoriesByCluster.collectAsMap().entrySet()) {
             int clusterId = e.getKey();
@@ -119,8 +131,6 @@ public class TfIdfTransformation {
                 firstPages.get(1)._1().getTitle() + "` = " + dist);
 
 
-
-
         // Categorie dovete morire!!!
 
 
@@ -129,9 +139,9 @@ public class TfIdfTransformation {
 
         List<String[]> catlist = cat.collect();
         int idx = 0;
-        for(String[] list : catlist){
+        for (String[] list : catlist) {
             System.out.println("Cats of doc" + idx++);
-            for(String c : list){
+            for (String c : list) {
                 System.out.println(c);
             }
             System.out.println();
@@ -142,7 +152,7 @@ public class TfIdfTransformation {
         // Note that we are using `mapToPair` instead of `map`, since
         // it returns a `JavaPairRDD` object, which has methods specialized
         // to work on key-value pairs, like the `reduceByKey` operation we use here.
-         JavaPairRDD<String[], Integer> dCounts = cat
+        JavaPairRDD<String[], Integer> dCounts = cat
                 .mapToPair((w) -> new Tuple2<>(w, 1))
                 .reduceByKey((x, y) -> x + y);
 
@@ -168,11 +178,6 @@ public class TfIdfTransformation {
         });
 
 */
-
-
-
-
-
 
 
     }
