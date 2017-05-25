@@ -112,13 +112,37 @@ public class TfIdfTransformation {
             return new Tuple2<WikiPage, Integer>(pav._1(), clusters.predict(pav._2()));
         });
 
+        //compute in how many clusters a category is split
+        JavaPairRDD<String, List<Integer>> tmp = Analyzer.getNumberOfClustersPerCat(clustersNew);
+        for (Map.Entry<String, List<Integer>> e : tmp.collectAsMap().entrySet()) {
+            String cat = e.getKey();
+            List<Integer> clustersList = e.getValue();
+            System.out.println("Category \"" + cat + "\" was found in " + clustersList.size() + " clusters.");
+        }
+
         //categorie per cluster
+        ArrayList<Integer> size_categories = new ArrayList<>();
         JavaPairRDD<Integer, List<String>> groupedCategoriesByCluster = Analyzer.getCategoriesDistribution(clustersNew);
         for (Map.Entry<Integer, List<String>> e : groupedCategoriesByCluster.collectAsMap().entrySet()) {
             int clusterId = e.getKey();
             List<String> categories = e.getValue();
+            size_categories.add(categories.size());
             System.out.println(categories.size() + " distinct categories found in cluster " + clusterId);
         }
+
+        //numero categorie distinte
+        int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
+        System.out.println("numero di categorie totali distinte:" + size);
+
+        //media delle categorie (con ripetizioni) presenti in ciascun cluster
+        int size_c = 0;
+        for(int i= 0; i < size_categories.size(); i++){
+            size_c+=size_categories.get(0);
+        }
+        double average = size_c/clusters.k();
+        System.out.println("categorie (con ripetizioni) presenti nei cluster: " + size_c);
+        System.out.println("k: " + clusters.k());
+        System.out.println("media di categorie presenti in ciascun cluster: " + average);
 
         /*
         for (Tuple2<WikiPage, Integer> p : clustersNew.collect()) {
@@ -131,11 +155,6 @@ public class TfIdfTransformation {
         System.out.println("Cosine distance between `" +
                 firstPages.get(0)._1().getTitle() + "` and `" +
                 firstPages.get(1)._1().getTitle() + "` = " + dist);
-
-
-
-
-        // Categorie dovete morire!!!
 
 
         // Get text out of pages
@@ -156,7 +175,7 @@ public class TfIdfTransformation {
         // Note that we are using `mapToPair` instead of `map`, since
         // it returns a `JavaPairRDD` object, which has methods specialized
         // to work on key-value pairs, like the `reduceByKey` operation we use here.
-         JavaPairRDD<String[], Integer> dCounts = cat
+        JavaPairRDD<String[], Integer> dCounts = cat
                 .mapToPair((w) -> new Tuple2<>(w, 1))
                 .reduceByKey((x, y) -> x + y);
 
@@ -182,13 +201,6 @@ public class TfIdfTransformation {
         });
 
 */
-
-
-
-
-
-
-
     }
 
 }

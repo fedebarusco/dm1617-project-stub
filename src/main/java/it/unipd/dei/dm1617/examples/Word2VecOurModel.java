@@ -137,9 +137,9 @@ public class Word2VecOurModel {
         }
         // here is what I added to predict data points that are within the clusters
         List<Integer> L = clusters.predict(data).collect();
-        for (Integer i : L) {
+        /*for (Integer i : L) {
             System.out.println(i);
-        }
+        }*/
 
         /*
             Map delle coppie (pagina, vettore) utilizzando il modello creato prima e il metodo predict
@@ -154,11 +154,22 @@ public class Word2VecOurModel {
             System.out.println(p._1().getTitle() + ", cluster: " + p._2());
         }
 */
+        //compute in how many clusters a category is split
+        JavaPairRDD<String, List<Integer>> tmp = Analyzer.getNumberOfClustersPerCat(clustersNew);
+        for (Map.Entry<String, List<Integer>> e : tmp.collectAsMap().entrySet()) {
+            String cat = e.getKey();
+            List<Integer> clustersList = e.getValue();
+            System.out.println("Category \"" + cat + "\" was found in " + clustersList.size() + " clusters.");
+        }
+
+
         //categorie per cluster
+        ArrayList<Integer> size_categories = new ArrayList<>();
         JavaPairRDD<Integer, List<String>> groupedCategoriesByCluster = Analyzer.getCategoriesDistribution(clustersNew);
         for (Map.Entry<Integer, List<String>> e : groupedCategoriesByCluster.collectAsMap().entrySet()) {
             int clusterId = e.getKey();
             List<String> categories = e.getValue();
+            size_categories.add(categories.size());
             System.out.println(categories.size() + " distinct categories found in cluster " + clusterId);
         }
 
@@ -166,7 +177,15 @@ public class Word2VecOurModel {
         int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
         System.out.println("numero di categorie totali distinte:" + size);
 
-
+        //media delle categorie (con ripetizioni) presenti in ciascun cluster
+        int size_c = 0;
+        for(int i= 0; i < size_categories.size(); i++){
+            size_c+=size_categories.get(0);
+        }
+        double average = size_c/clusters.k();
+        System.out.println("categorie (con ripetizioni) presenti nei cluster: " + size_c);
+        System.out.println("k: " + clusters.k());
+        System.out.println("media di categorie presenti in ciascun cluster: " + average);
 
         // Finally, we print the distance between the first two pages
         List<Tuple2<WikiPage, Vector>> firstPages = pageAndVector.take(2);
