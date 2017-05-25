@@ -190,6 +190,12 @@ public class Word2VecOurModel {
             }
             size_c+=size_categories.get(i);
         }
+        size_categories.sort(Integer::compareTo);
+        for(int i= 0; i < size_categories.size(); i++){
+            System.out.println("categorie ordinate: " + size_categories.get(i));
+        }
+        int mediam = size_categories.get((int)size_categories.size()/2);
+        System.out.println("mediana: " + mediam);
         double average = size_c/clusters.k();
         System.out.println("categorie (con ripetizioni) presenti nei cluster: " + size_c);
         System.out.println("k: " + clusters.k());
