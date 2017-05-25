@@ -136,13 +136,18 @@ public class TfIdfTransformation {
 
         //media delle categorie (con ripetizioni) presenti in ciascun cluster
         int size_c = 0;
+        int max_cat = size_categories.get(0);
         for(int i= 0; i < size_categories.size(); i++){
-            size_c+=size_categories.get(0);
+            if(max_cat < size_categories.get(i)){
+                max_cat = size_categories.get(i);
+            }
+            size_c+=size_categories.get(i);
         }
         double average = size_c/clusters.k();
         System.out.println("categorie (con ripetizioni) presenti nei cluster: " + size_c);
         System.out.println("k: " + clusters.k());
         System.out.println("media di categorie presenti in ciascun cluster: " + average);
+        System.out.println("il massimo numero di categorie presenti in un cluster: " + max_cat);
 
         /*
         for (Tuple2<WikiPage, Integer> p : clustersNew.collect()) {
