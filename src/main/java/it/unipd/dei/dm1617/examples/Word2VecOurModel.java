@@ -32,6 +32,10 @@ public class Word2VecOurModel {
         // Load dataset of pages
         JavaRDD<WikiPage> pages = InputOutput.read(sc, dataPath);
 
+        //quante pagine (dataset) ci sono nel dataset
+        long num_pages = pages.count();
+        System.out.println("numero di pagine presenti nel dataset: " + num_pages);
+
         // Get text out of pages
         JavaRDD<String> texts = pages.map((p) -> p.getText());
 
