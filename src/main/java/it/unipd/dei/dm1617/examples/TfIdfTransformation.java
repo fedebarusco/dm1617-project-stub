@@ -32,6 +32,10 @@ public class TfIdfTransformation {
         // Load dataset of pages
         JavaRDD<WikiPage> pages = InputOutput.read(sc, dataPath);
 
+        //quante pagine (dataset) ci sono nel dataset
+        long num_pages = pages.count();
+        System.out.println("numero di pagine presenti nel dataset: " + num_pages);
+
         // Get text out of pages
         JavaRDD<String> texts = pages.map((p) -> p.getText());
 
@@ -113,12 +117,32 @@ public class TfIdfTransformation {
         });
 
         //compute in how many clusters a category is split
+        ArrayList<Integer> size_cluster = new ArrayList<>();
         JavaPairRDD<String, List<Integer>> tmp = Analyzer.getNumberOfClustersPerCat(clustersNew);
         for (Map.Entry<String, List<Integer>> e : tmp.collectAsMap().entrySet()) {
             String cat = e.getKey();
             List<Integer> clustersList = e.getValue();
+            size_cluster.add(clustersList.size());
             System.out.println("Category \"" + cat + "\" was found in " + clustersList.size() + " clusters.");
         }
+        //in media una categoria è stata trovata in tot cluster
+        int size_cu = 0;
+        int max_cu = size_cluster.get(0);
+        for(int i= 0; i < size_cluster.size(); i++){
+            if(max_cu < size_cluster.get(i)){
+                max_cu = size_cluster.get(i);
+            }
+            size_cu+=size_cluster.get(i);
+        }
+        //metto in ordine crescente il numero di cluster
+        size_cluster.sort(Integer::compareTo);
+        int mediam_cu = size_cluster.get((int)(size_cluster.size()/2));
+        System.out.println("mediana dei cluster contenenti una stessa categoria: " + mediam_cu);
+        double average_cu = size_cu/clusters.k();
+        System.out.println("somma del numero di cluster contenti una stessa categoria: " + size_cu);
+        System.out.println("k: " + clusters.k());
+        System.out.println("media dei cluster contenenti una stessa categoria: " + average_cu);
+        System.out.println("il massimo numero di cluster che contengono una stessa categoria: " + max_cu);
 
         //categorie per cluster
         ArrayList<Integer> size_categories = new ArrayList<>();
@@ -143,6 +167,13 @@ public class TfIdfTransformation {
             }
             size_c+=size_categories.get(i);
         }
+        //metto in ordine crescente le categorie per ogni cluster
+        size_categories.sort(Integer::compareTo);
+        for(int i= 0; i < size_categories.size(); i++){
+            System.out.println("categorie ordinate: " + size_categories.get(i));
+        }
+        int mediam = size_categories.get((int)(size_categories.size()/2));
+        System.out.println("mediana: " + mediam);
         double average = size_c/clusters.k();
         System.out.println("categorie (con ripetizioni) presenti nei cluster: " + size_c);
         System.out.println("k: " + clusters.k());
