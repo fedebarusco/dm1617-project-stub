@@ -2,11 +2,24 @@ package it.unipd.dei.dm1617;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
+import scala.Tuple12;
 import scala.Tuple2;
 
 import java.util.*;
 
-public class Analyzer {
+    public class Analyzer {
+    public static JavaPairRDD<Integer, Integer> getNuberOfPagePerCluster(JavaPairRDD<WikiPage, Integer> clusters){
+        return clusters.mapToPair( t -> new Tuple2<Integer, WikiPage>(t._2(), t._1())).groupByKey().mapToPair(p -> {
+            int size =0;
+            Iterator i = p._2().iterator();
+            while(i.hasNext()){
+                size++;
+                i.next();
+            }
+           return new Tuple2<>(p._1(), size);
+        });
+    }
+
     public static JavaPairRDD<String, List<Integer>> getNumberOfClustersPerCat(JavaPairRDD<WikiPage, Integer> clusters) {
         return clusters.flatMapToPair((PairFlatMapFunction<Tuple2<WikiPage, Integer>, String, List<Integer>>) pv -> {
             List<Tuple2<String, List<Integer>>> tmpCats = new ArrayList<>();
