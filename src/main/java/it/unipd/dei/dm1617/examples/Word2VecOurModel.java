@@ -29,6 +29,9 @@ public class Word2VecOurModel {
                 .setAppName("Word2VecModel");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
+        //Set hadoop distribution directory
+        System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
+
         // Load dataset of pages
         JavaRDD<WikiPage> pages = InputOutput.read(sc, dataPath);
 
