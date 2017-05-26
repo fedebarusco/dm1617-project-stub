@@ -116,6 +116,10 @@ public class TfIdfTransformation {
             return new Tuple2<WikiPage, Integer>(pav._1(), clusters.predict(pav._2()));
         });
 
+        //numero categorie distinte
+        int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
+        System.out.println("numero di categorie totali distinte:" + size);
+
         //compute in how many clusters a category is split
         ArrayList<Integer> size_cluster = new ArrayList<>();
         JavaPairRDD<String, List<Integer>> tmp = Analyzer.getNumberOfClustersPerCat(clustersNew);
@@ -138,7 +142,7 @@ public class TfIdfTransformation {
         size_cluster.sort(Integer::compareTo);
         int mediam_cu = size_cluster.get((int)(size_cluster.size()/2));
         System.out.println("mediana dei cluster contenenti una stessa categoria: " + mediam_cu);
-        double average_cu = size_cu/clusters.k();
+        double average_cu = size_cu/size;
         System.out.println("somma del numero di cluster contenti una stessa categoria: " + size_cu);
         System.out.println("k: " + clusters.k());
         System.out.println("media dei cluster contenenti una stessa categoria: " + average_cu);
@@ -153,10 +157,6 @@ public class TfIdfTransformation {
             size_categories.add(categories.size());
             System.out.println(categories.size() + " distinct categories found in cluster " + clusterId);
         }
-
-        //numero categorie distinte
-        int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
-        System.out.println("numero di categorie totali distinte:" + size);
 
         //media delle categorie (con ripetizioni) presenti in ciascun cluster
         int size_c = 0;
