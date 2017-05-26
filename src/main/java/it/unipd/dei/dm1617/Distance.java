@@ -34,5 +34,17 @@ public class Distance {
     // rescale by PI instead of PI/2
     return (2 / Math.PI) * Math.acos(cosine);
   }
-    
+
+  public static double euclidianDistance(Vector a, Vector b) {
+    int length = a.size();
+    if (length != b.size()) {
+      throw new IllegalArgumentException("Vectors should be in the same space");
+    }
+    double sumSq = 0.0;
+    for (int i = 0; i < length; i++) {
+      double diff = a.apply(i) - b.apply(i);
+      sumSq += diff * diff;
+    }
+    return Math.sqrt(sumSq);
+  }
 }
