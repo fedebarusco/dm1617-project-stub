@@ -230,6 +230,13 @@ public class Word2VecOurModel {
         System.out.println("Cosine distance between `" +
                 firstPages.get(0)._1().getTitle() + "` and `" +
                 firstPages.get(1)._1().getTitle() + "` = " + dist);
+
+        // Get Silhouette coefficient
+        // Restituisce il silhouette coefficient relativo al dataset
+        // Prob è un parametro che permette di decidere che percentuale di punti intendiamo utilizzare, utile se vogliamo snellire il procedimento
+
+        double s = Silhouette.getSilhouette(pageAndVector, clusters, 10);
+        System.out.printf("Total Silhouette: %f\n", s);
     }
 
     public static Vector sumVectors(Vector v1, Vector v2) {
