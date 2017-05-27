@@ -22,7 +22,6 @@ import java.util.*;
 public class Silhouette {
 
     protected static double getSilhouette(JavaPairRDD<WikiPage, Vector> pageAndVector, KMeansModel clusters, double prob) {
-
         Map<Integer,List<Vector>> clusterPointsByID = new HashMap<>();
         for (Tuple2<WikiPage, Vector> pav : pageAndVector.collect()) {
             int cluster = clusters.predict(pav._2());
@@ -35,7 +34,7 @@ public class Silhouette {
             clusterPointsByID.put(cluster, l);
         }
         //Facendo un breakpoint su questo return si possono vedere le dimensioni dei vari cluster.
-        return silhouetteCoefficient(clusterPointsByID);
+        return silhouetteCoefficient(clusters, clusterPointsByID);
     }
 
     public static Vector sumVectors(Vector v1, Vector v2) {
@@ -47,12 +46,13 @@ public class Silhouette {
         return Vectors.dense(sum);
     }
 
-    static double silhouetteCoefficient(Map<Integer, List<Vector>> clusterPointsByID) {
+    static double silhouetteCoefficient(KMeansModel clusters, Map<Integer, List<Vector>> clusterPointsByID) {
         double totalSilhouetteCoefficient = 0.0;
         long sampleCount = 0L;
 
 
         for (Map.Entry<Integer, List<Vector>> cluster : clusterPointsByID.entrySet()) {
+
             List<Vector> clusteredPoints = cluster.getValue();
             long clusterSize = clusteredPoints.size();
             // Increment the total sample count for computing silhouette coefficient
@@ -65,12 +65,12 @@ public class Silhouette {
                 double clusterAvg = 0.0;
                 for (Vector point : clusteredPoints) {
                     double pointIntraClusterDissimilarity = clusterDissimilarityForPoint(point, clusteredPoints, true);
-                    double pointInterClusterDissimilarity = minInterClusterDissimilarityForPoint(cluster.getKey(), point, clusterPointsByID);
+                    double pointInterClusterDissimilarity = minInterClusterDissimilarityForPoint(clusters, cluster.getKey(), point, clusterPointsByID);
                     double s = silhouetteCoefficient(pointIntraClusterDissimilarity, pointInterClusterDissimilarity);
                     totalSilhouetteCoefficient += s;
                     clusterAvg += s/clusterSize;
 
-                    // System.out.println(s);
+                    System.out.println(s);
                 }
                 System.out.println("Il silhouette coefficent del cluster " + cluster.getKey() + " vale: " + clusterAvg);
             }
@@ -81,16 +81,27 @@ public class Silhouette {
     }
 
     private static double minInterClusterDissimilarityForPoint(
-            int otherClusterID,
+            KMeansModel clusters, int otherClusterID,
             Vector point,
             Map<Integer, List<Vector>> clusteredPointsMap) {
-        return clusteredPointsMap.entrySet().stream().mapToDouble(entry -> {
+
+        double minDist = Double.POSITIVE_INFINITY;
+        for (Map.Entry<Integer, List<Vector>> entry : clusteredPointsMap.entrySet()) {
             // only compute dissimilarities with other clusters
-            if (entry.getKey().equals(otherClusterID)) {
-                return Double.POSITIVE_INFINITY;
-            }
-            return clusterDissimilarityForPoint(point, entry.getValue(), false);
-        }).min().orElse(Double.POSITIVE_INFINITY);
+            if (entry.getKey().equals(otherClusterID))
+                continue;
+
+            Vector center = clusters.clusterCenters()[entry.getKey()];
+            double centerDist = Distance.euclidianDistance(center, point);
+            if (centerDist * .5 > minDist)
+                continue;
+
+            double dist = clusterDissimilarityForPoint(point, entry.getValue(), false);
+            if (dist < minDist)
+                minDist = dist;
+        }
+
+        return minDist;
     }
 
     static double silhouetteCoefficient(double ai, double bi) {
