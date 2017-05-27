@@ -8,7 +8,7 @@ import scala.Tuple2;
 import java.util.*;
 
     public class Analyzer {
-    public static JavaPairRDD<Integer, Integer> getNuberOfPagePerCluster(JavaPairRDD<WikiPage, Integer> clusters){
+    public static JavaPairRDD<Integer, Integer> getNumberOfPagePerCluster(JavaPairRDD<WikiPage, Integer> clusters){
         return clusters.mapToPair( t -> new Tuple2<Integer, WikiPage>(t._2(), t._1())).groupByKey().mapToPair(p -> {
             int size =0;
             Iterator i = p._2().iterator();
