@@ -47,6 +47,7 @@ public class TfIdfTransformation {
         // times.
         JavaRDD<ArrayList<String>> lemmas = Lemmatizer.lemmatize(texts).cache();
 
+        //StopWords
         Broadcast<Set<String>> stopWords = sc.broadcast(
                 new HashSet<>(Arrays.asList(StopWordsRemover.loadDefaultStopWords("english")) )
         );
