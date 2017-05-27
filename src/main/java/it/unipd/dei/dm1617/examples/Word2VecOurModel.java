@@ -14,6 +14,9 @@ import org.apache.spark.mllib.feature.Word2Vec;
 import org.apache.spark.mllib.feature.Word2VecModel;
 import org.apache.spark.mllib.linalg.Vectors;
 import scala.Tuple2;
+import org.apache.spark.mllib.clustering.StreamingKMeans;
+import org.apache.spark.mllib.linalg.Vectors;
+import org.apache.spark.mllib.regression.LabeledPoint;
 
 import java.io.File;
 import java.util.*;
@@ -72,6 +75,12 @@ public class Word2VecOurModel {
                 //nel modello consideriamo solo le parole che si ripetono più di 2 volte (>=2) questo per la legge di Zipf (da approfondire)
                 .setMinCount(2) // il default è 5 se si vuole lasciare 5 bisogna levare le pagine che danno problemi
                 .fit(lemmas);
+
+
+
+
+
+
 
         JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
             int i = 0;
@@ -165,6 +174,8 @@ public class Word2VecOurModel {
         //numero categorie distinte
         int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
         System.out.println("numero di categorie totali distinte:" + size);
+
+
 
         //compute in how many clusters a category is split
         ArrayList<Integer> size_cluster = new ArrayList<>();
