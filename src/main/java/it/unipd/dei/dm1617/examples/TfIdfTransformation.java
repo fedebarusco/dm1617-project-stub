@@ -25,14 +25,15 @@ public class TfIdfTransformation {
     public static void main(String[] args) {
         String dataPath = args[0];
 
+
+        //Set hadoop distribution directory
+        System.setProperty("hadoop.home.dir","C:\\Users\\Piccy\\Desktop\\hadoop\\bin");
+
         // Usual setup
         SparkConf conf = new SparkConf(true).setAppName("Tf-Ifd transformation");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
-        //Set hadoop distribution directory
-        System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
-
-        // Load dataset of pages
+         // Load dataset of pages
         JavaRDD<WikiPage> pages = InputOutput.read(sc, dataPath);
 
         //quante pagine (dataset) ci sono nel dataset
@@ -124,6 +125,8 @@ public class TfIdfTransformation {
         int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
         System.out.println("numero di categorie totali distinte:" + size);
 
+
+
         //compute in how many clusters a category is split
         ArrayList<Integer> size_cluster = new ArrayList<>();
         JavaPairRDD<String, List<Integer>> tmp = Analyzer.getNumberOfClustersPerCat(clustersNew);
@@ -209,6 +212,7 @@ public class TfIdfTransformation {
             }
             System.out.println();
         }
+
 
 
         // Now we can apply the MR algorithm for word count.
