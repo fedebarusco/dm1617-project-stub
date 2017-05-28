@@ -213,6 +213,9 @@ public class TfIdfTransformation {
             System.out.println();
         }
 
+        double s = Silhouette.getSilhouette(pagesAndVectors, clusters, 10);
+        System.out.printf("Total Silhouette: %f\n", s);
+
 
 
         // Now we can apply the MR algorithm for word count.
