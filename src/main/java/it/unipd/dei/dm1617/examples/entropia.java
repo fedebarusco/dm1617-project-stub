@@ -23,7 +23,7 @@ import java.lang.Math;
 
 public class entropia {
 
-    public static Map<Integer, Double> calcolaEntrCluster(JavaPairRDD<WikiPage, Integer> clustersNew){
+    public static Map<Integer, Double> calcolaEntrCluster(JavaPairRDD<WikiPage, Integer> clustersNew, JavaSparkContext sc){
 
         double entr=0.0;
         int mci;
@@ -54,9 +54,9 @@ public class entropia {
             entropy.put(e._1(), entr);
             entr=0; //reset entr
         }
-            /*questo va chiamato eventualmente fuori dal metodo
+
             //per ottenere Rdd invece di mappa
-            //oppure passare sc (spark context) come parametro
+            /*
             List<Tuple2<Integer, Double>> list = new ArrayList<Tuple2<Integer, Double>>();
             for(Map.Entry<Integer, Double> entry : entropy.entrySet()){
                 list.add(new Tuple2<Integer, Double>(entry.getKey(),entry.getValue()));
@@ -67,7 +67,7 @@ public class entropia {
             return entropy;
         }
 
-    public static Map<String, Double> calcolaEntrCat(JavaPairRDD<WikiPage, Integer> clustersNew, int k){
+    public static Map<String, Double> calcolaEntrCat(JavaPairRDD<WikiPage, Integer> clustersNew, int k, JavaSparkContext sc){
         //k è il numero di cluster, lo prendiamo da input
         //mi in teoria del preprocessing, poi vediamo se lo prendo da una struttura dati
         double entr=0.0;
@@ -88,22 +88,11 @@ public class entropia {
                     entr = entr + formulacategorie(mci, mi);
                 }
                 entr = -entr; //l'entropia è negativa
-
                 //ora inserisco nel'RDD in uscita
                 entropy.put(e._1(), entr);
                 entr = 0; //reset entr
             }
 
-            /*questo va chiamato eventualmente fuori dal metodo
-            //per ottenere Rdd invece di mappa
-            //oppure passare sc (spark context) come parametro
-            List<Tuple2<Integer, Double>> list = new ArrayList<Tuple2<Integer, Double>>();
-            for(Map.Entry<Integer, Double> entry : entropy.entrySet()){
-                list.add(new Tuple2<Integer, Double>(entry.getKey(),entry.getValue()));
-            }
-
-            JavaPairRDD<Integer, Double> RddEntropia = sc.parallelizePairs(list);
-            */
         return entropy;
     }
 
