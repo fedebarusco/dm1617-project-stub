@@ -42,6 +42,13 @@ public class Word2VecOurModel {
         long num_pages = pages.count();
         System.out.println("numero di pagine presenti nel dataset: " + num_pages);
 
+        //preprocessing category
+        pages = Analyzer.cleanCategories(pages, 1, 10000, sc);
+
+        //quante pagine ci sono nel dataset dopo il preprocessing sul numero di pagine nelle categorie
+        long num_pages1 = pages.count();
+        System.out.println("numero di pagine presenti nel dataset dopo: " + num_pages1);
+
         // Get text out of pages
         JavaRDD<String> texts = pages.map((p) -> p.getText());
 
