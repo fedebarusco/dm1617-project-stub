@@ -16,7 +16,7 @@ public class Analyzer {
     public static int getNumberOfDocsInClusterPerCat(String cat, int clusterIdx, JavaPairRDD<WikiPage, Integer> clusters) {
         return clusters.filter(t -> (t._2() == clusterIdx) && (Arrays.asList(t._1().getCategories()).contains(cat))).collect().size();
     }//controlla che non sovrascrive il cluster
-    //chiama size() prima e dopo
+    //chiamare size() prima e dopo
 
     public static JavaRDD<WikiPage> cleanCategories(JavaRDD<WikiPage> data, int lThr, int hThr, JavaSparkContext sc) {
         JavaPairRDD<String, Integer> catsFreqs = getCategoriesFrequencies(data);
