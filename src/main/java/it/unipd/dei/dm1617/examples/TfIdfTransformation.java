@@ -25,9 +25,8 @@ public class TfIdfTransformation {
     public static void main(String[] args) {
         String dataPath = args[0];
 
-
         //Set hadoop distribution directory
-        System.setProperty("hadoop.home.dir","C:\\Users\\Piccy\\Desktop\\hadoop\\bin");
+        System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
 
         // Usual setup
         SparkConf conf = new SparkConf(true).setAppName("Tf-Ifd transformation");
@@ -36,9 +35,16 @@ public class TfIdfTransformation {
          // Load dataset of pages
         JavaRDD<WikiPage> pages = InputOutput.read(sc, dataPath);
 
-        //quante pagine (dataset) ci sono nel dataset
+        //quante pagine ci sono nel dataset
         long num_pages = pages.count();
         System.out.println("numero di pagine presenti nel dataset: " + num_pages);
+
+        //preprocessing category
+        pages = Analyzer.cleanCategories(pages, 1, 10000, sc);
+
+        //quante pagine ci sono nel dataset dopo il preprocessing sul numero di pagine nelle categorie
+        long num_pages1 = pages.count();
+        System.out.println("numero di pagine presenti nel dataset dopo: " + num_pages1);
 
         // Get text out of pages
         JavaRDD<String> texts = pages.map((p) -> p.getText());
@@ -62,6 +68,15 @@ public class TfIdfTransformation {
             }
             return filtered;
         });
+
+        /*Map<String[] , Long> PagePerCategory = pages.groupBy(WikiPage::getCategories).countByKey();
+
+        for(String[] s : PagePerCategory.keySet()){
+            System.out.println("PagePerCategory: " + PagePerCategory.get(s));
+        }*/
+
+        JavaPairRDD<Long , Iterable<WikiPage>> PagePerCategory1 = pages.groupBy(WikiPage::getId);
+
 
         // Transform the sequence of lemmas in vectors of counts in a
         // space of 100 dimensions, using the 100 top lemmas as the vocabulary.
