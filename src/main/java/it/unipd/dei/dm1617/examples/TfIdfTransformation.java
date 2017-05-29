@@ -237,15 +237,15 @@ public class TfIdfTransformation {
         //Inizializzare un cluster casuale che io qui chiamerò Gianfranco.
         //Gianfranco deve essere di tipo JavaPairRDD<Wikipage, Integer>
         //Buon lavoro jessica
-        /*
-        JavaPairRDD<WikiPage, Integer> Gianfranco;
+
+        //JavaPairRDD<WikiPage, Integer> Gianfranco;
         Map<Integer, Double> EntropiaClusters = entropia.calcolaEntrCluster(clustersNew);
-        Map<String, Double> EntropiaCategorie = entropia.calcolaEntrCat(clustersNew, k);//che cacchio è k = num di cluster
-        Map<Integer, Double> EntropiaRandomClusters = entropia.calcolaEntrCluster(Gianfranco);
-        Map<String, Double> EntropiaRandomCategorie = entropia.calcolaEntrCat(Gianfranco, k);
+        Map<String, Double> EntropiaCategorie = entropia.calcolaEntrCat(clustersNew, numClusters);//che cacchio è k = num di cluster
+        //Map<Integer, Double> EntropiaRandomClusters = entropia.calcolaEntrCluster(Gianfranco);
+        //Map<String, Double> EntropiaRandomCategorie = entropia.calcolaEntrCat(Gianfranco, numClusters);
         //Eseguire il confronto
 
-        */
+
 
 
 

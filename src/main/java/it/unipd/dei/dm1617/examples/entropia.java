@@ -23,7 +23,7 @@ import java.lang.Math;
 
 public class entropia {
 
-    public static Map<Integer, Double> calcolaEntrCluster(JavaPairRDD<WikiPage, Integer> clustersNew, JavaSparkContext sc){
+    public static Map<Integer, Double> calcolaEntrCluster(JavaPairRDD<WikiPage, Integer> clustersNew){
 
         double entr=0.0;
         int mci;
@@ -67,7 +67,7 @@ public class entropia {
             return entropy;
         }
 
-    public static Map<String, Double> calcolaEntrCat(JavaPairRDD<WikiPage, Integer> clustersNew, int k, JavaSparkContext sc){
+    public static Map<String, Double> calcolaEntrCat(JavaPairRDD<WikiPage, Integer> clustersNew, int k){
         //k è il numero di cluster, lo prendiamo da input
         //mi in teoria del preprocessing, poi vediamo se lo prendo da una struttura dati
         double entr=0.0;
