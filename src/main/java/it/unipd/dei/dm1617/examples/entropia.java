@@ -26,22 +26,26 @@ public class entropia {
     public static Map<Integer, Double> calcolaEntrCluster(JavaPairRDD<WikiPage, Integer> clustersNew){
 
         double entr=0.0;
-        int mci=1;
+        int mci;
         int mc;
 
         JavaPairRDD<String, Integer> catfreq = Analyzer.getCategoriesFrequencies(clustersNew);
-        int L = Analyzer.getCategoriesFrequencies(clustersNew).collect().size(); //numero totale di categorie
+
+        //int L = Analyzer.getCategoriesFrequencies(clustersNew).collect().size(); //numero totale di categorie
 
         JavaPairRDD<Integer, Integer> arr = Analyzer.getNumberOfPagePerCluster(clustersNew);
         //con questo for ottengo gli mc = # di punti in ogni cluster
 
         Map<Integer, Double> entropy = new HashMap<>();
-
+        String temp;
 
         for (Tuple2<Integer, Integer> e : arr.collect()) {
             mc = e._2();
+
             //mancano gli mci, trova gli mci in funzione di e._1(), = ID del cluster,  e chiama
-            for (int i = 0; i < L; i++) {
+            for (Tuple2<String, Integer> cat : catfreq.collect()) {
+                temp = cat._1();
+                mci = Analyzer.getNumberOfDocsInClusterPerCat(temp, e._1(), clustersNew);
                 entr = entr + formulacluster(mci, mc);
             }
             entr = -entr; //l'entropia è negativa
@@ -67,24 +71,29 @@ public class entropia {
         //k è il numero di cluster, lo prendiamo da input
         //mi in teoria del preprocessing, poi vediamo se lo prendo da una struttura dati
         double entr=0.0;
-        int mci=1;
+        int mci;
         int mi;
+        String temp;
         JavaPairRDD<String, Integer> catfreq = Analyzer.getCategoriesFrequencies(clustersNew);//ma gli mi li tiriamo fuori da qui in realtà
 
         Map<String, Double> entropy = new HashMap<>();
 
-        for (Tuple2<String, Integer> e : catfreq.collect()) {
-            mi = e._2();
-            //mancano gli mci, trova gli mci in funzione di e._1(), = ID del cluster,  e chiama
-            for (int i = 0; i < k; i++) {
-                entr = entr + formulacategorie(mci, mi);
-            }
-            entr = -entr; //l'entropia è negativa
 
-            //ora inserisco nel'RDD in uscita
-            entropy.put(e._1(), entr);
-            entr=0; //reset entr
-        }
+            for (Tuple2<String, Integer> e : catfreq.collect()) {
+                mi = e._2();
+                temp = e._1();
+                for (int i = 0; i < k; i++) {
+
+                    mci = Analyzer.getNumberOfDocsInClusterPerCat(temp, i, clustersNew);
+                    entr = entr + formulacategorie(mci, mi);
+                }
+                entr = -entr; //l'entropia è negativa
+
+                //ora inserisco nel'RDD in uscita
+                entropy.put(e._1(), entr);
+                entr = 0; //reset entr
+            }
+
             /*questo va chiamato eventualmente fuori dal metodo
             //per ottenere Rdd invece di mappa
             //oppure passare sc (spark context) come parametro
