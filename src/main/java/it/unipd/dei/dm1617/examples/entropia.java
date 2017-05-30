@@ -28,7 +28,7 @@ public class entropia {
         double entr=0.0;
         int mci;
         int mc;
-
+        int stop = 0;
         JavaPairRDD<String, Integer> catfreq = Analyzer.getCategoriesFrequencies(clustersNew);
 
         //int L = Analyzer.getCategoriesFrequencies(clustersNew).collect().size(); //numero totale di categorie
@@ -38,7 +38,7 @@ public class entropia {
 
         Map<Integer, Double> entropy = new HashMap<>();
         String temp;
-
+        System.out.println("Stop = " + stop);
         for (Tuple2<Integer, Integer> e : arr.collect()) {
             mc = e._2();
 
@@ -46,13 +46,20 @@ public class entropia {
             for (Tuple2<String, Integer> cat : catfreq.collect()) {
                 temp = cat._1();
                 mci = Analyzer.getNumberOfDocsInClusterPerCat(temp, e._1(), clustersNew);
-                entr = entr + formulacluster(mci, mc);
+                if(mci!=0) {
+                    entr = entr + formulacluster(mci, mc);
+                    stop++;
+                    System.out.println("Categoria =  " + temp + " mc= " + mc + " mci = " + mci + " Entropia calcolata = " + entr);
+                }
+                if (stop>3) break;
             }
+
             entr = -entr; //l'entropia è negativa
 
             //ora inserisco nel'RDD in uscita
             entropy.put(e._1(), entr);
             entr=0; //reset entr
+            if (stop>3) break;
         }
 
             //per ottenere Rdd invece di mappa
@@ -73,6 +80,7 @@ public class entropia {
         double entr=0.0;
         int mci;
         int mi;
+
         String temp;
         JavaPairRDD<String, Integer> catfreq = Analyzer.getCategoriesFrequencies(clustersNew);//ma gli mi li tiriamo fuori da qui in realtà
 
@@ -85,20 +93,22 @@ public class entropia {
                 for (int i = 0; i < k; i++) {
 
                     mci = Analyzer.getNumberOfDocsInClusterPerCat(temp, i, clustersNew);
+                    if(mci!=0)
                     entr = entr + formulacategorie(mci, mi);
                 }
                 entr = -entr; //l'entropia è negativa
                 //ora inserisco nel'RDD in uscita
                 entropy.put(e._1(), entr);
                 entr = 0; //reset entr
+
             }
 
         return entropy;
     }
 
     private static double formulacluster(int mci, int mc){
-
-        return (double)(mci/mc)*log2((double)(mci/mc));
+        double num = (double)mci/mc;
+        return num*log2(num);
     }
 
     private static double formulacategorie(int mci, int mi){

@@ -26,7 +26,11 @@ public class TfIdfTransformation {
         String dataPath = args[0];
 
         //Set hadoop distribution directory
-        System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
+        //mettete ognuno il vostro percorso
+        //percorso di giovanni:
+        System.setProperty("hadoop.home.dir", "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mining\\progetto");
+        //percorso di manu
+        //System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
 
         // Usual setup
         SparkConf conf = new SparkConf(true).setAppName("Tf-Ifd transformation");
@@ -227,20 +231,26 @@ public class TfIdfTransformation {
             }
             System.out.println();
         }
-
+        /*
         double s = Silhouette.getSilhouette(pagesAndVectors, clusters, 10);
         System.out.printf("Total Silhouette: %f\n", s);
 
-
+        */
         //Calcolo dell'entropia e confronto con entropia di un cluster casuale
 
         //Inizializzare un cluster casuale che io qui chiamerò Gianfranco.
         //Gianfranco deve essere di tipo JavaPairRDD<Wikipage, Integer>
         //Buon lavoro jessica
+        System.out.println("Iniziamo con l'entropia");
 
         //JavaPairRDD<WikiPage, Integer> Gianfranco;
         Map<Integer, Double> EntropiaClusters = entropia.calcolaEntrCluster(clustersNew);
-        Map<String, Double> EntropiaCategorie = entropia.calcolaEntrCat(clustersNew, numClusters);//che cacchio è k = num di cluster
+        for(int i=0; i< EntropiaClusters.size(); i++)
+            System.out.println("Entropia del cluster " + i + " = " + EntropiaClusters.get(i));
+
+
+
+        //Map<String, Double> EntropiaCategorie = entropia.calcolaEntrCat(clustersNew, numClusters);//che cacchio è k = num di cluster
         //Map<Integer, Double> EntropiaRandomClusters = entropia.calcolaEntrCluster(Gianfranco);
         //Map<String, Double> EntropiaRandomCategorie = entropia.calcolaEntrCat(Gianfranco, numClusters);
         //Eseguire il confronto
