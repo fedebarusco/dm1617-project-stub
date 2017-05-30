@@ -87,8 +87,9 @@ public class Word2VecOurModel {
                 .setMinCount(2) // il default è 5 se si vuole lasciare 5 bisogna levare le pagine che danno problemi
                 .fit(lemmas);
 
-        //savataggio del modello
+        //savataggio del modello Word2Vec
         model.save(sc.sc(), path_model);
+        System.out.println("modello salvato Word2Vec");
 
         JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
             int i = 0;

@@ -28,9 +28,9 @@ public class TfIdfTransformation {
         //Set hadoop distribution directory
         //mettete ognuno il vostro percorso
         //percorso di giovanni:
-        System.setProperty("hadoop.home.dir", "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mining\\progetto");
+        //System.setProperty("hadoop.home.dir", "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mining\\progetto");
         //percorso di manu
-        //System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
+        System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
 
         // Usual setup
         SparkConf conf = new SparkConf(true).setAppName("Tf-Ifd transformation");
@@ -73,14 +73,7 @@ public class TfIdfTransformation {
             return filtered;
         });
 
-        /*Map<String[] , Long> PagePerCategory = pages.groupBy(WikiPage::getCategories).countByKey();
-
-        for(String[] s : PagePerCategory.keySet()){
-            System.out.println("PagePerCategory: " + PagePerCategory.get(s));
-        }*/
-
-        JavaPairRDD<Long , Iterable<WikiPage>> PagePerCategory1 = pages.groupBy(WikiPage::getId);
-
+        String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\model_tfidf";
 
         // Transform the sequence of lemmas in vectors of counts in a
         // space of 100 dimensions, using the 100 top lemmas as the vocabulary.
@@ -108,6 +101,10 @@ public class TfIdfTransformation {
         JavaRDD<Vector> tfidf = new IDF()
                 .fit(tf)
                 .transform(tf);
+
+        //savataggio del modello TfIdf
+        tfidf.saveAsTextFile(path_model);
+        System.out.println("modello salvato tfidf");
 
         // In this last step we "zip" toghether the original pages and
         // their corresponding tfidf vectors. We can perform this
