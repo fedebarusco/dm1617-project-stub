@@ -74,20 +74,21 @@ public class Word2VecOurModel {
 
         JavaPairRDD<WikiPage, ArrayList<String>> pageAndLemma = pages.zip(lemmas);
 
+        String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\model_word2vec";
         Word2Vec word2vec = new Word2Vec();
 
-        //per ogni categoria vedere in quanti cluster è spezzata
+        //Word2VecModel model = Word2VecModel.load(sc.sc(), path_model);
+
+        //Word2VecModel sameModel = Word2VecModel.load(sc.sc(), path_model);
+
         Word2VecModel model = word2vec
                 .setVectorSize(100)
                 //nel modello consideriamo solo le parole che si ripetono più di 2 volte (>=2) questo per la legge di Zipf (da approfondire)
                 .setMinCount(2) // il default è 5 se si vuole lasciare 5 bisogna levare le pagine che danno problemi
                 .fit(lemmas);
 
-
-
-
-
-
+        //savataggio del modello
+        model.save(sc.sc(), path_model);
 
         JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
             int i = 0;
@@ -95,7 +96,7 @@ public class Word2VecOurModel {
             for (String lemma : pair._2()) {
                 Vector tmp = null;
                 try {
-                    tmp = model.transform(lemma);
+                    tmp = model.transform(lemma); //= sameModel.transform();
                 } catch (java.lang.IllegalStateException e) {
                     i++;
                     tmp = null;
@@ -113,7 +114,6 @@ public class Word2VecOurModel {
             return new Tuple2<WikiPage, Vector>(pair._1(), docvec);
         });
 
-        //pageAndVector.filter(pair -> pair._2 != null);
         pageAndVector = pageAndVector.filter(pair -> {
             return pair != null && pair._2() != null && pair._1() != null;
         }).cache();
@@ -125,10 +125,6 @@ public class Word2VecOurModel {
             System.out.println(el._2());
         }
         System.out.println();
-        //Tuple2<String, Object>[] synonyms = model.findSynonyms("age", 5);
-        //synonyms.
-        //String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\";
-        //model.save(sc.sc(), path_model);
 
         JavaRDD<Vector> data = pageAndVector.map(pair -> pair._2());
 
@@ -166,7 +162,7 @@ public class Word2VecOurModel {
         }*/
 
         /*
-            Map delle coppie (pagina, vettore) utilizzando il modello creato prima e il metodo predict
+            Map del le coppie (pagina, vettore) utilizzando il modello creato prima e il metodo predict
             che prendendo come argomento il vettore corrispondente alla pagina restituisce il cluster, l'RDD
             restituita alla fine è la coppia (pagina, indice del cluster corrispondente)
          */
@@ -178,11 +174,10 @@ public class Word2VecOurModel {
             System.out.println(p._1().getTitle() + ", cluster: " + p._2());
         }
 */
+        //per ogni categoria vedere in quanti cluster è spezzata
         //numero categorie distinte
         int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
         System.out.println("numero di categorie totali distinte:" + size);
-
-
 
         //compute in how many clusters a category is split
         ArrayList<Integer> size_cluster = new ArrayList<>();
