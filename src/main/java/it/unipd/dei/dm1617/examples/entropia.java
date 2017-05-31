@@ -75,10 +75,6 @@ public class entropia {
 
         String temp; //utilizzata nel metodo getNumberOfDocsInClusterPerCat
 
-        //per il debug
-        System.out.println("Stop = " + stop);
-
-
         //per ogni ID di cluster in arr (coppie ID-# di pagine in Cluster piccolo)
         for (Tuple2<Integer, Integer> e : arr.collect()) {
 
@@ -99,20 +95,20 @@ public class entropia {
                     //ho verificato che stampa correttamente
                     System.out.println("Categoria =  " + temp + " mc= " + mc + " mci = " + mci + " Entropia calcolata = " + entr);
                 }
-                if (stop>=1) break;//lo faccio fermare appena ne trova una, ma può metterci 40 minuti
+                if (stop>=5) break;//lo faccio fermare appena ne trova una, ma può metterci 40 minuti
             }
 
             entr = entr*(-1.0); //l'entropia è negativa, va cambiata di segno dalla definizione
 
             //ora inserisco nel'RDD in uscita
-            System.out.println("e._1() = " + e._1() + " e._1().intValue() = " +e._1().intValue() + " entr = " + entr);
-            System.out.println("inserisco in entropia in posizione " +e._1()+ " il valore " + entropy.put(e._1().intValue(), entr));
+
+            entropy.put(e._1(), entr);
             //se non lo fermassi continuerebbe a manetta per giorni o forse settimane
             //comunque quando ha finito per il cluster 0 (o 1 a seconda) si resetta il valore di entr
             entr=0; //reset entr
 
             //debug, lo fermo subito
-            if (stop>=1) break;
+            if (stop>=5) break;
         }
             // non importante
             //per ottenere Rdd invece di mappa
@@ -142,6 +138,10 @@ public class entropia {
         JavaPairRDD<String, Integer> catfreq = Analyzer.getCategoriesFrequencies(clustersNew);//ma gli mi li tiriamo fuori da qui in realtà
 
         Map<String, Double> entropy = new HashMap<>();
+        //necessario inizializzare la mappa in output
+        for(Tuple2<String, Integer> e : catfreq.collect()){
+            entropy.put(e._1(), 0.0);
+        }
 
 
             for (Tuple2<String, Integer> e : catfreq.collect()) {
