@@ -59,13 +59,13 @@ public class Word2VecOurModel {
 
         //StopWords
         Broadcast<Set<String>> stopWords = sc.broadcast(
-                new HashSet<>(Arrays.asList(StopWordsRemover.loadDefaultStopWords("english")) )
+                new HashSet<>(Arrays.asList(StopWordsRemover.loadDefaultStopWords("english")))
         );
 
         lemmas = lemmas.map(ls -> {
             ArrayList<String> filtered = new ArrayList<>();
-            for (String s : ls){
-                if(!stopWords.getValue().contains(s)) {
+            for (String s : ls) {
+                if (!stopWords.getValue().contains(s)) {
                     filtered.add(s);
                 }
             }
@@ -77,10 +77,12 @@ public class Word2VecOurModel {
         String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\model_word2vec";
         Word2Vec word2vec = new Word2Vec();
 
-        //Word2VecModel model = Word2VecModel.load(sc.sc(), path_model);
+        //caricamento del modello di Word2Vec salvato
+        Word2VecModel model = Word2VecModel.load(sc.sc(), path_model);
+        System.out.println("carico modello word2vec");
 
         //Word2VecModel sameModel = Word2VecModel.load(sc.sc(), path_model);
-
+        /*
         Word2VecModel model = word2vec
                 .setVectorSize(100)
                 //nel modello consideriamo solo le parole che si ripetono più di 2 volte (>=2) questo per la legge di Zipf (da approfondire)
@@ -90,6 +92,7 @@ public class Word2VecOurModel {
         //savataggio del modello Word2Vec
         model.save(sc.sc(), path_model);
         System.out.println("modello salvato Word2Vec");
+        */
 
         JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
             int i = 0;
@@ -97,7 +100,7 @@ public class Word2VecOurModel {
             for (String lemma : pair._2()) {
                 Vector tmp = null;
                 try {
-                    tmp = model.transform(lemma); //= sameModel.transform();
+                    tmp = model.transform(lemma);
                 } catch (java.lang.IllegalStateException e) {
                     i++;
                     tmp = null;
@@ -192,17 +195,17 @@ public class Word2VecOurModel {
         //in media una categoria è stata trovata in tot cluster
         int size_cu = 0;
         int max_cu = size_cluster.get(0);
-        for(int i= 0; i < size_cluster.size(); i++){
-            if(max_cu < size_cluster.get(i)){
+        for (int i = 0; i < size_cluster.size(); i++) {
+            if (max_cu < size_cluster.get(i)) {
                 max_cu = size_cluster.get(i);
             }
-            size_cu+=size_cluster.get(i);
+            size_cu += size_cluster.get(i);
         }
         //metto in ordine crescente il numero di cluster
         size_cluster.sort(Integer::compareTo);
-        int mediam_cu = size_cluster.get((int)(size_cluster.size()/2));
+        int mediam_cu = size_cluster.get((int) (size_cluster.size() / 2));
         System.out.println("mediana dei cluster contenenti una stessa categoria: " + mediam_cu);
-        double average_cu = size_cu/size;
+        double average_cu = size_cu / size;
         System.out.println("somma del numero di cluster contenti una stessa categoria: " + size_cu);
         System.out.println("k: " + clusters.k());
         System.out.println("media dei cluster contenenti una stessa categoria: " + average_cu);
@@ -221,19 +224,19 @@ public class Word2VecOurModel {
         //media delle categorie (con ripetizioni) presenti in ciascun cluster
         int size_c = 0;
         int max_cat = size_categories.get(0);
-        for(int i= 0; i < size_categories.size(); i++){
-            if(max_cat < size_categories.get(i)){
+        for (int i = 0; i < size_categories.size(); i++) {
+            if (max_cat < size_categories.get(i)) {
                 max_cat = size_categories.get(i);
             }
-            size_c+=size_categories.get(i);
+            size_c += size_categories.get(i);
         }
         size_categories.sort(Integer::compareTo);
-        for(int i= 0; i < size_categories.size(); i++){
+        for (int i = 0; i < size_categories.size(); i++) {
             System.out.println("categorie ordinate: " + size_categories.get(i));
         }
-        int mediam = size_categories.get((int)(size_categories.size()/2));
+        int mediam = size_categories.get((int) (size_categories.size() / 2));
         System.out.println("mediana: " + mediam);
-        double average = size_c/clusters.k();
+        double average = size_c / clusters.k();
         System.out.println("categorie (con ripetizioni) presenti nei cluster: " + size_c);
         System.out.println("k: " + clusters.k());
         System.out.println("media di categorie presenti in ciascun cluster: " + average);
@@ -267,16 +270,7 @@ public class Word2VecOurModel {
         //Eseguire il confronto
 
 
-
-
-
-
     }
-
-
-
-
-
 
 
     public static Vector sumVectors(Vector v1, Vector v2) {
