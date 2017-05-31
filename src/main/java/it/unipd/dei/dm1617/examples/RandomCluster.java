@@ -1,6 +1,7 @@
 package it.unipd.dei.dm1617.examples;
 
 
+import it.unipd.dei.dm1617.Distance;
 import it.unipd.dei.dm1617.WikiPage;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.mllib.clustering.KMeansModel;
@@ -11,20 +12,65 @@ import scala.Tuple2;
 
 import static java.lang.Math.*;
 
+import java.util.*;
+
 
 public class RandomCluster {
 
     JavaPairRDD<WikiPage, Integer> RandClus;
+    static int nodes;
+    static List<Tuple2<Integer, Vector>> centers;
 
-    public RandomCluster(KMeansModel clusters, JavaPairRDD<WikiPage, Vector> pageAndVector) {
-        RandClus = pageAndVector.mapToPair(pav -> {
-            return new Tuple2<WikiPage, Integer>(pav._1(), (int)(Math.random()*100));
-        });
+    public RandomCluster(JavaPairRDD<WikiPage, Vector> pageAndVector, int k) {
+        nodes = k;
+        centers = findCenters(pageAndVector);
     }
 
-    public JavaPairRDD<WikiPage, Integer> getRandClus(){
-        return RandClus;
+    //Metodo che restituisce una lista di coppie indice, vettore. Dove l'indice è l'indice del cluster
+    //Il vettore rappresenta le coordinate del centro
+    private static List<Tuple2<Integer, Vector>> findCenters(JavaPairRDD<WikiPage, Vector> pageAndVector)
+    {
+        int i = 0;
+        List<Tuple2<Integer, Vector>> centers = new ArrayList<>();
+        //Prendiamo dei punti a caso dal dataset
+        List<Tuple2<WikiPage, Vector>> samples = pageAndVector.takeSample(false, nodes);
+        //Ogni punto dei samples viene eletto a centro del cluster i
+        for(Tuple2<WikiPage, Vector> spl : samples)
+        {
+            centers.add(new Tuple2<Integer, Vector>(i, spl._2()));
+            i++;
+        }
+        return centers;
     }
 
+    //metodo che ci restituisce un vettore contenente i centri dei cluster
+    public  Vector[] clusterCenters(){
+        Vector[] c = new Vector[nodes];
+        for(Tuple2<Integer, Vector> p : centers)
+            c[p._1()] = p._2();
+        return c;
+    }
+
+    //Metodo che assegna ad un cluster il punto point
+    public int predict(Vector point){
+        int index = 0;
+        double dist = 0.0;
+        double minDist = Double.POSITIVE_INFINITY;
+
+        //Cicliamo su ogni singolo centro e ci calcoliamo la distanza euclidea
+        for(Tuple2<Integer, Vector> c : centers){
+            dist = Distance.euclidianDistance(point, c._2());
+            //Se la distanza dal centro in esame è minore di minDist allora lo assegnamo momentaneamente al cluster index
+            if (dist < minDist){
+                minDist = dist;
+                index = c._1();
+            }
+            //Se la distanza euclidea è 0 il punto è il centro del cluster, è inutile ciclare oltre.
+            if (minDist == 0.0)
+                break;
+        }
+
+        return index;
+    }
 
 }
