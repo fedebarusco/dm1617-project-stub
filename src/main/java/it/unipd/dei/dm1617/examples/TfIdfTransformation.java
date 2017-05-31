@@ -103,8 +103,8 @@ public class TfIdfTransformation {
                 .transform(tf);
 
         //savataggio del modello TfIdf
-        tfidf.saveAsTextFile(path_model);
-        System.out.println("modello salvato tfidf");
+        //tfidf.saveAsTextFile(path_model);
+        //System.out.println("modello salvato tfidf");
 
         // In this last step we "zip" toghether the original pages and
         // their corresponding tfidf vectors. We can perform this
