@@ -8,8 +8,6 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.ml.feature.StopWordsRemover;
-import org.apache.spark.mllib.clustering.KMeans;
-import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.feature.Word2Vec;
 import org.apache.spark.mllib.feature.Word2VecModel;
 import org.apache.spark.mllib.linalg.Vector;
@@ -18,10 +16,10 @@ import scala.Tuple2;
 
 import java.util.*;
 
+//Uguale alla classe Silhouette, questa però può utilizzare il modello random
+public class SilhouetteOnRandom {
 
-public class Silhouette {
-
-    protected static double getSilhouette(JavaPairRDD<WikiPage, Vector> pageAndVector, KMeansModel clusters, double prob) {
+    protected static double getSilhouette(JavaPairRDD<WikiPage, Vector> pageAndVector, RandomCluster clusters, double prob) {
 
         //Mappa che contiene come chiave il valore del cluster, come valore una lista dei punti associati a tale cluster
         Map<Integer,List<Vector>> pointsByID = new HashMap<>();
@@ -42,7 +40,7 @@ public class Silhouette {
         return silhouetteCoefficient(clusters, pointsByID);
     }
 
-    static double silhouetteCoefficient(KMeansModel clusters, Map<Integer, List<Vector>> pointsByID) {
+    static double silhouetteCoefficient(RandomCluster clusters, Map<Integer, List<Vector>> pointsByID) {
         double totalSilhouetteCoefficient = 0.0;
         long numPoints = 0L;
 
@@ -77,7 +75,7 @@ public class Silhouette {
             return totalSilhouetteCoefficient / numPoints;
     }
 
-    private static double getPointBiValue(KMeansModel clusters, int otherClusterID, Vector point,
+    private static double getPointBiValue(RandomCluster clusters, int otherClusterID, Vector point,
                                           Map<Integer, List<Vector>> clusteredPointsMap) {
 
         double minDist = Double.POSITIVE_INFINITY;
