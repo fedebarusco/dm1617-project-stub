@@ -59,12 +59,49 @@ public class entropia {
 
     }
 
+    public static Map<String, Double> EntrCat(JavaPairRDD<WikiPage, Integer> clustersNew, JavaPairRDD<String, Integer[]> catfreperclu, int k){
+        double entr=0.0;
+        int mci;
+        int mi;
+        String temp;
+        JavaPairRDD<String, Integer> catfreq = Analyzer.getCategoriesFrequencies(clustersNew);
+
+        Map<String, Double>entropy = new HashMap<>();
+
+        //inizializzare la mappa
+        for(Tuple2<String, Integer> a: catfreq.collect())
+            entropy.put(a._1(), 0.0);
+
+        for(Tuple2<String, Integer> a: catfreq.collect()){
+            mi = a._2();
+            temp=a._1();
+            for (Tuple2<String, Integer[]> b : catfreperclu.collect()){
+                    if(b._1().equals(temp)) {
+                        for(int i=0; i<k; i++) {
+                            mci = b._2()[i];
+                            if (mci != 0) {
+                                entr = entr + formulacategorie(mci, mi);
+                                break;
+                            }
+                        }
+                    }
+                    break;
+            }
+            entr = -entr; //l'entropia è negativa
+            //ora inserisco nel'RDD in uscita
+            entropy.put(temp, entr);
+            entr = 0.0; //reset entr
+        }
+
+        return entropy;
+
+    }
 
 
     //****************************************************************************************************************
     //Sbagliatissimi non usare
 
-    public static Map<Integer, Double> calcolaEntrCluster(JavaPairRDD<WikiPage, Integer> clustersNew){
+    public static Map<Integer, Double> NONUSAREcalcolaEntrCluster(JavaPairRDD<WikiPage, Integer> clustersNew){
 
         double entr=0.0;
         int mci;//rappresenta il numero di occorrenze della categoria i nel cluster (piccolo) C
@@ -152,7 +189,7 @@ public class entropia {
             return entropy;
         }//fine metodo
 
-    public static Map<String, Double> calcolaEntrCat(JavaPairRDD<WikiPage, Integer> clustersNew, int k){
+    public static Map<String, Double> NONUSAREcalcolaEntrCat(JavaPairRDD<WikiPage, Integer> clustersNew, int k){
         //k è il numero di cluster, lo prendiamo da input
         //mi in teoria del preprocessing, poi vediamo se lo prendo da una struttura dati
         double entr=0.0;

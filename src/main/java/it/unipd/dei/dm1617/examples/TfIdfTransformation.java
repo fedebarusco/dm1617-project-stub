@@ -28,9 +28,9 @@ public class TfIdfTransformation {
         //Set hadoop distribution directory
         //mettete ognuno il vostro percorso
         //percorso di giovanni:
-        //System.setProperty("hadoop.home.dir", "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mining\\progetto");
+        System.setProperty("hadoop.home.dir", "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mining\\progetto");
         //percorso di manu
-        System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
+        //System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
 
         // Usual setup
         SparkConf conf = new SparkConf(true).setAppName("Tf-Ifd transformation");
@@ -73,7 +73,8 @@ public class TfIdfTransformation {
             return filtered;
         });
 
-        String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\model_tfidf";
+        //String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\model_tfidf";
+        String path_model = "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mininig\\progetto\\modelw2v";
 
         // Transform the sequence of lemmas in vectors of counts in a
         // space of 100 dimensions, using the 100 top lemmas as the vocabulary.
@@ -235,23 +236,20 @@ public class TfIdfTransformation {
         */
         //Calcolo dell'entropia e confronto con entropia di un cluster casuale
 
-        //Inizializzare un cluster casuale che io qui chiamerò Gianfranco.
-        //Gianfranco deve essere di tipo JavaPairRDD<Wikipage, Integer>
-        //Buon lavoro jessica
-        System.out.println("Iniziamo con l'entropia");
+        JavaPairRDD<String, Integer[]> catfreperclu = Analyzer.getCategoryFreqInAllClusters(clustersNew, numClusters);
 
-        //JavaPairRDD<WikiPage, Integer> Gianfranco;
-        Map<Integer, Double> EntropiaClusters = entropia.calcolaEntrCluster(clustersNew);
+        Map<Integer, Double> EntropiaClusters = entropia.EntrClu(clustersNew, catfreperclu);
+        System.out.println("Entropia ultimata");
         for(int i=0; i< EntropiaClusters.size(); i++)
             System.out.println("Entropia del cluster " + i + " = " + EntropiaClusters.get(i));
 
+        /*
+        Map<String, Double>EntropiaCategorie=entropia.EntrCat(clustersNew, catfreperclu, numClusters);
 
-
-        //Map<String, Double> EntropiaCategorie = entropia.calcolaEntrCat(clustersNew, numClusters);//che cacchio è k = num di cluster
-        //Map<Integer, Double> EntropiaRandomClusters = entropia.calcolaEntrCluster(Gianfranco);
-        //Map<String, Double> EntropiaRandomCategorie = entropia.calcolaEntrCat(Gianfranco, numClusters);
-        //Eseguire il confronto
-
+        JavaPairRDD<String, Integer> catfreq = Analyzer.getCategoriesFrequencies(clustersNew);
+        for(Tuple2<String, Integer> a : catfreq.collect())
+        System.out.println("Entropia di "+ a._1() +" = " + EntropiaCategorie.get(a._1()));
+        */
 
 
 

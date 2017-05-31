@@ -258,19 +258,6 @@ public class Word2VecOurModel {
         double s = Silhouette.getSilhouette(pageAndVector, clusters, 10);
         System.out.printf("Total Silhouette: %f\n", s);
 
-        //Calcolo dell'entropia e confronto con entropia di un cluster casuale
-
-        //Inizializzare un cluster casuale che io qui chiamerò Gianfranco.
-        //Gianfranco deve essere di tipo JavaPairRDD<Wikipage, Integer>
-        //Buon lavoro jessica
-
-        //JavaPairRDD<WikiPage, Integer> Gianfranco;
-        Map<Integer, Double> EntropiaClusters = entropia.calcolaEntrCluster(clustersNew);
-        Map<String, Double> EntropiaCategorie = entropia.calcolaEntrCat(clustersNew, numClusters);//che cacchio è k = num di cluster
-        //Map<Integer, Double> EntropiaRandomClusters = entropia.calcolaEntrCluster(Gianfranco);
-        //Map<String, Double> EntropiaRandomCategorie = entropia.calcolaEntrCat(Gianfranco, numClusters);
-        //Eseguire il confronto
-
 
     }
 
