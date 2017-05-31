@@ -22,20 +22,47 @@ import java.util.*;
 import java.lang.Math;
 
 public class entropia {
-    //Per Alberto:
-    //Copia del tuo metodo
 
-    /*
-    public static int getNumberOfDocsInClusterPerCat(String cat, int clusterIdx, JavaPairRDD<WikiPage, Integer> clusters) {
-        return clusters.filter(t -> (t._2() == clusterIdx) && (Arrays.asList(t._1().getCategories()).contains(cat))).collect().size();
-    }//controlla che non sovrascrive il cluster
-    //chiamare size() prima e dopo
-    */
+    public static Map<Integer, Double> EntrClu(JavaPairRDD<WikiPage, Integer> clustersNew, JavaPairRDD<String, Integer[]> catfreperclu){
+
+        double entr=0.0;
+        int mci;
+        int mc;
+
+        JavaPairRDD<Integer, Integer> arr = Analyzer.getNumberOfPagePerCluster(clustersNew);
+
+        Map<Integer, Double> entropy = new HashMap<>();
+
+        for(int i =0; i<arr.count(); i++){
+            entropy.put(i, 0.0);
+        }
+
+        Integer temp[];
+        for(Tuple2<Integer, Integer> b : arr.collect()) {
+
+            mc=b._2();
+
+            for(Tuple2<String, Integer[]> a : catfreperclu.collect()){
+                temp=a._2();
+                mci=temp[b._1()];
+                if(mci!=0) {
+                    entr = entr + formulacluster(mci, mc);
+                }
+            }
+            entr = -entr;
+
+            entropy.put(b._1(),entr);
+            entr=0.0;
+        }
+
+        return entropy;
+
+    }
 
 
-    //calcolaEntrCluster e calcolaEntrCat hanno tempistiche fuori dai limiti, i tre metodi sotto sono semplici calcoli matematici
-    //guardati solo il metodo seguente: calcolaEntrCluster, tanto l'altro è quasi identico
 
+    //****************************************************************************************************************
+    //Sbagliatissimi non usare
 
     public static Map<Integer, Double> calcolaEntrCluster(JavaPairRDD<WikiPage, Integer> clustersNew){
 
@@ -95,7 +122,7 @@ public class entropia {
                     //ho verificato che stampa correttamente
                     System.out.println("Categoria =  " + temp + " mc= " + mc + " mci = " + mci + " Entropia calcolata = " + entr);
                 }
-                if (stop>=5) break;//lo faccio fermare appena ne trova una, ma può metterci 40 minuti
+                if (stop>1) break;//lo faccio fermare appena ne trova una, ma può metterci 40 minuti
             }
 
             entr = entr*(-1.0); //l'entropia è negativa, va cambiata di segno dalla definizione
@@ -108,7 +135,7 @@ public class entropia {
             entr=0; //reset entr
 
             //debug, lo fermo subito
-            if (stop>=5) break;
+            if (stop>1) break;
         }
             // non importante
             //per ottenere Rdd invece di mappa
@@ -124,8 +151,6 @@ public class entropia {
 
             return entropy;
         }//fine metodo
-
-
 
     public static Map<String, Double> calcolaEntrCat(JavaPairRDD<WikiPage, Integer> clustersNew, int k){
         //k è il numero di cluster, lo prendiamo da input
@@ -163,6 +188,7 @@ public class entropia {
         return entropy;
     }
 
+    //*****************************************************************************************************************
     //metodi che fanno solo un semplice calcolo, tutti O(1) e chiamati solo quando mci!=0
     private static double formulacluster(int mci, int mc){
         double num = (double)mci/mc;

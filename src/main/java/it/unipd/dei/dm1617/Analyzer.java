@@ -18,6 +18,43 @@ public class Analyzer {
     }//controlla che non sovrascrive il cluster
     //chiamare size() prima e dopo
 
+
+    public static JavaPairRDD<String, Integer[]> getCategoryFreqInAllClusters(JavaPairRDD<WikiPage, Integer> clusters, int totalClustersNum) {
+        /*
+        * prendo ciascuna coppia wikipage e cluster, trasformo prima la lista in una lista di coppie: categoria e
+        * array di Integer. L'array di Integer contiene un 1 se la categoria della coppia appare in quel cluster.
+        * Poi faccio un reduceByKey, sommando gli elementi degli array nella stessa posizione, in questo modo se la
+        * stessa categoria appare piu volte nello stesso cluster sommo la frequenza. Restituisco la struttura dati
+        * risultante che contiene tutte le info.
+        * */
+        return clusters.flatMapToPair(wpc -> {
+            List<Tuple2<String, Integer[]>> l = new ArrayList<>();
+            for (String c : wpc._1().getCategories()) {
+                Integer[] tmp = new Integer[totalClustersNum];
+                tmp[wpc._2()] = 1;
+                l.add(new Tuple2<>(c, tmp));
+            }
+            return l.iterator();
+        }).reduceByKey((l1, l2) -> sumArrays(l1, l2));
+
+    }
+
+    public static Integer[] sumArrays(Integer[] a1, Integer[] a2) {
+
+        Integer[] res = new Integer[a1.length];
+
+        for (int i = 0; i < a1.length; i++) {
+            //modifica importante
+            if(a1[i]==null)a1[i]=0;
+            if(a2[i]==null)a2[i]=0;
+            res[i] = a1[i] + a2[i];
+        }
+        return res;
+    }
+
+
+
+
     /**
      * Elimina da ciascun oggetto wikipage le categorie che compaiono nel dataset con frequenza al di fuori  delle soglie specificate.
      * Se un oggetto wikipage resta con 0 categorie, l'oggetto viene eliminato.
