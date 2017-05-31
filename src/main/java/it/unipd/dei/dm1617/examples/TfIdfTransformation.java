@@ -28,7 +28,7 @@ public class TfIdfTransformation {
         //Set hadoop distribution directory
         //mettete ognuno il vostro percorso
         //percorso di giovanni:
-        System.setProperty("hadoop.home.dir", "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mining\\progetto");
+        //System.setProperty("hadoop.home.dir", "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mining\\progetto");
         //percorso di manu
         //System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
 
@@ -74,7 +74,7 @@ public class TfIdfTransformation {
         });
 
         //String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\model_tfidf";
-        String path_model = "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mininig\\progetto\\modelw2v";
+        //String path_model = "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mininig\\progetto\\modelw2v";
 
         // Transform the sequence of lemmas in vectors of counts in a
         // space of 100 dimensions, using the 100 top lemmas as the vocabulary.
@@ -137,6 +137,9 @@ public class TfIdfTransformation {
         JavaPairRDD<WikiPage, Integer> clustersNew = pagesAndVectors.mapToPair(pav -> {
             return new Tuple2<WikiPage, Integer>(pav._1(), clusters.predict(pav._2()));
         });
+
+        //crea un cluster random
+        RandomCluster random = new RandomCluster(pagesAndVectors, numClusters);
 
         //numero categorie distinte
         int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
@@ -229,11 +232,17 @@ public class TfIdfTransformation {
             }
             System.out.println();
         }
+
         /*
+        //calcola il silhouette coefficient sul cluster generato con kmeans
         double s = Silhouette.getSilhouette(pagesAndVectors, clusters, 10);
         System.out.printf("Total Silhouette: %f\n", s);
 
+        //calcola il silhouette coefficient sul cluster random
+        double sr = SilhouetteOnRandom.getSilhouette(pagesAndVectors, random, 10);
+        System.out.printf("Total Silhouette: %f\n", sr);
         */
+
         //Calcolo dell'entropia e confronto con entropia di un cluster casuale
 
         JavaPairRDD<String, Integer[]> catfreperclu = Analyzer.getCategoryFreqInAllClusters(clustersNew, numClusters);

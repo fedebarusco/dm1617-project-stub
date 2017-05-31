@@ -17,7 +17,6 @@ import java.util.*;
 
 public class RandomCluster {
 
-    JavaPairRDD<WikiPage, Integer> RandClus;
     static int nodes;
     static List<Tuple2<Integer, Vector>> centers;
 
@@ -53,20 +52,24 @@ public class RandomCluster {
 
     //Metodo che assegna ad un cluster il punto point
     public int predict(Vector point){
-        int index = 0;
+        Random rnd = new Random();
+        double prob = 0.2;
         double dist = 0.0;
         double minDist = Double.POSITIVE_INFINITY;
+        double stat = 0.0;
+        int index = Integer.MAX_VALUE;
 
         //Cicliamo su ogni singolo centro e ci calcoliamo la distanza euclidea
         for(Tuple2<Integer, Vector> c : centers){
             dist = Distance.euclidianDistance(point, c._2());
             //Se la distanza dal centro in esame è minore di minDist allora lo assegnamo momentaneamente al cluster index
-            if (dist < minDist){
+            if (dist <= minDist){
                 minDist = dist;
                 index = c._1();
             }
-            //Se la distanza euclidea è 0 il punto è il centro del cluster, è inutile ciclare oltre.
-            if (minDist == 0.0)
+            stat = rnd.nextDouble();
+
+            if ((minDist == 0.0) && (stat < prob))
                 break;
         }
 

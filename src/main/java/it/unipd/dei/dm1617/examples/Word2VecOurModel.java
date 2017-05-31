@@ -167,6 +167,9 @@ public class Word2VecOurModel {
             System.out.println(i);
         }*/
 
+        //crea un cluster random
+        RandomCluster random = new RandomCluster(pageAndVector, numClusters);
+
         /*
             Map del le coppie (pagina, vettore) utilizzando il modello creato prima e il metodo predict
             che prendendo come argomento il vettore corrispondente alla pagina restituisce il cluster, l'RDD
@@ -258,6 +261,9 @@ public class Word2VecOurModel {
         double s = Silhouette.getSilhouette(pageAndVector, clusters, 10);
         System.out.printf("Total Silhouette: %f\n", s);
 
+        //calcola il silhouette coefficient sul cluster random
+        double sr = SilhouetteOnRandom.getSilhouette(pageAndVector, random, 10);
+        System.out.printf("Total Silhouette: %f\n", sr);
 
     }
 
