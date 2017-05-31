@@ -33,7 +33,7 @@ public class Word2VecOurModel {
         JavaSparkContext sc = new JavaSparkContext(conf);
 
         //Set hadoop distribution directory
-        System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
+        //System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
 
         // Load dataset of pages
         JavaRDD<WikiPage> pages = InputOutput.read(sc, dataPath);
@@ -74,15 +74,17 @@ public class Word2VecOurModel {
 
         JavaPairRDD<WikiPage, ArrayList<String>> pageAndLemma = pages.zip(lemmas);
 
-        String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\model_word2vec";
+        //String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\model_word2vec";
+        String path_model = "/Users/federicobarusco/Documents/DM_Project";
+
         Word2Vec word2vec = new Word2Vec();
 
         //caricamento del modello di Word2Vec salvato
-        Word2VecModel model = Word2VecModel.load(sc.sc(), path_model);
+        //Word2VecModel model = Word2VecModel.load(sc.sc(), path_model);
         System.out.println("carico modello word2vec");
 
         //Word2VecModel sameModel = Word2VecModel.load(sc.sc(), path_model);
-        /*
+
         Word2VecModel model = word2vec
                 .setVectorSize(100)
                 //nel modello consideriamo solo le parole che si ripetono più di 2 volte (>=2) questo per la legge di Zipf (da approfondire)
@@ -92,7 +94,7 @@ public class Word2VecOurModel {
         //savataggio del modello Word2Vec
         model.save(sc.sc(), path_model);
         System.out.println("modello salvato Word2Vec");
-        */
+
 
         JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
             int i = 0;
