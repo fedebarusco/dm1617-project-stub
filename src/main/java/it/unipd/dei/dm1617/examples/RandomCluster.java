@@ -51,7 +51,7 @@ public class RandomCluster {
     }
 
     //Metodo che assegna ad un cluster il punto point
-    public int predict(Vector point){
+    public static int predict(Vector point){
         Random rnd = new Random();
         double prob = 0.2;
         double dist = 0.0;
@@ -75,5 +75,6 @@ public class RandomCluster {
 
         return index;
     }
+
 
 }

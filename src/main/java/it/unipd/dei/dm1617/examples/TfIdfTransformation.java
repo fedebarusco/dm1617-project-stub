@@ -233,7 +233,7 @@ public class TfIdfTransformation {
             System.out.println();
         }
 
-        /*
+
         //calcola il silhouette coefficient sul cluster generato con kmeans
         double s = Silhouette.getSilhouette(pagesAndVectors, clusters, 10);
         System.out.printf("Total Silhouette: %f\n", s);
@@ -241,41 +241,30 @@ public class TfIdfTransformation {
         //calcola il silhouette coefficient sul cluster random
         double sr = SilhouetteOnRandom.getSilhouette(pagesAndVectors, random, 10);
         System.out.printf("Total Silhouette: %f\n", sr);
-        */
+
+        JavaPairRDD<WikiPage, Integer> clustersRand = pagesAndVectors.mapToPair(pav -> {
+            return new Tuple2<WikiPage, Integer>(pav._1(), RandomCluster.predict(pav._2()));
+        });
 
         //Calcolo dell'entropia e confronto con entropia di un cluster casuale
-
         JavaPairRDD<String, Integer[]> catfreperclu = Analyzer.getCategoryFreqInAllClusters(clustersNew, numClusters);
-        /*
+        JavaPairRDD<String, Integer[]> catfreperrand = Analyzer.getCategoryFreqInAllClusters(clustersRand, numClusters);
+
         Map<Integer, Double> EntropiaClusters = entropia.EntrClu(clustersNew, catfreperclu);
+        System.out.println("la media dell'entropia dei cluster kmeans vale: " + entropia.mediaEntrClu(EntropiaClusters));
 
-        for(int i=0; i< EntropiaClusters.size(); i++)
-            System.out.println("Entropia del cluster " + i + " = " + EntropiaClusters.get(i));
-        System.out.println("la media dell'entropia dei cluster vale: " + entropia.mediaEntrClu(EntropiaClusters));
-        */
         Map<String, Double>EntropiaCategorie = entropia.EntrCat(catfreperclu, numClusters);
+        System.out.println("la media dell'entropia delle categorie kmeans vale: " + entropia.mediaEntrCat(EntropiaCategorie, clustersNew));
 
-        //è un po problematico stampare le categorie
-        for(Tuple2<String, Integer[]> a: catfreperclu.collect()){
-            System.out.println("Entropia della categoria " + a._1() + " = " + EntropiaCategorie.get(a._1()));
-        }
+        Map<Integer, Double> EnCluRand = entropia.EntrClu(clustersRand, catfreperrand);
+        System.out.println("la media dell'entropia dei cluster random vale: " + entropia.mediaEntrClu(EnCluRand));
 
-        System.out.println("la media dell'entropia delle categorie vale: " + entropia.mediaEntrCat(EntropiaCategorie, clustersNew));
+        Map<String, Double>EnCatRand = entropia.EntrCat(catfreperrand, numClusters);
+        System.out.println("la media dell'entropia delle categorie vale: " + entropia.mediaEntrCat(EnCatRand, clustersRand));
 
-
-        /*
-        Map<String, Double>EntropiaCategorie=entropia.EntrCat(clustersNew, catfreperclu, numClusters);
-
-        JavaPairRDD<String, Integer> catfreq = Analyzer.getCategoriesFrequencies(clustersNew);
-        for(Tuple2<String, Integer> a : catfreq.collect())
-        System.out.println("Entropia di "+ a._1() +" = " + EntropiaCategorie.get(a._1()));
-        */
-
-
-
-
-
-
+        System.out.println("Differenza Entropie Kmeans-Random");
+        System.out.println("Clusters: " + (entropia.mediaEntrClu(EntropiaClusters)-entropia.mediaEntrClu(EnCluRand)));
+        System.out.println("Categorie: " + (entropia.mediaEntrCat(EntropiaCategorie,clustersNew)-entropia.mediaEntrCat(EnCatRand, clustersRand)));
 
         // Now we can apply the MR algorithm for word count.
         // Note that we are using `mapToPair` instead of `map`, since

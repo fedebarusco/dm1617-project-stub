@@ -75,13 +75,13 @@ public class Word2VecOurModel {
         JavaPairRDD<WikiPage, ArrayList<String>> pageAndLemma = pages.zip(lemmas);
 
         //String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\model_word2vec";
-        String path_model = "/Users/federicobarusco/Documents/DM_Project";
-
+        //String path_model = "/Users/federicobarusco/Documents/DM_Project";
+        //String path_model = "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mininig\\progetto\\modelw2v";
         Word2Vec word2vec = new Word2Vec();
 
         //caricamento del modello di Word2Vec salvato
         //Word2VecModel model = Word2VecModel.load(sc.sc(), path_model);
-        System.out.println("carico modello word2vec");
+        //System.out.println("carico modello word2vec");
 
         //Word2VecModel sameModel = Word2VecModel.load(sc.sc(), path_model);
 
@@ -92,8 +92,8 @@ public class Word2VecOurModel {
                 .fit(lemmas);
 
         //savataggio del modello Word2Vec
-        model.save(sc.sc(), path_model);
-        System.out.println("modello salvato Word2Vec");
+        //model.save(sc.sc(), path_model);
+        //System.out.println("modello salvato Word2Vec");
 
 
         JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
@@ -264,6 +264,37 @@ public class Word2VecOurModel {
         //calcola il silhouette coefficient sul cluster random
         double sr = SilhouetteOnRandom.getSilhouette(pageAndVector, random, 10);
         System.out.printf("Total Silhouette: %f\n", sr);
+
+        JavaPairRDD<WikiPage, Integer> clustersRand = pageAndVector.mapToPair(pav -> {
+            return new Tuple2<WikiPage, Integer>(pav._1(), RandomCluster.predict(pav._2()));
+        });
+
+        //Calcolo dell'entropia e confronto con entropia di un cluster casuale
+
+        JavaPairRDD<String, Integer[]> catfreperclu = Analyzer.getCategoryFreqInAllClusters(clustersNew, numClusters);
+        JavaPairRDD<String, Integer[]> catfreperrand = Analyzer.getCategoryFreqInAllClusters(clustersRand, numClusters);
+
+        Map<Integer, Double> EntropiaClusters = entropia.EntrClu(clustersNew, catfreperclu);
+        System.out.println("la media dell'entropia dei cluster kmeans vale: " + entropia.mediaEntrClu(EntropiaClusters));
+
+        Map<String, Double>EntropiaCategorie = entropia.EntrCat(catfreperclu, numClusters);
+        System.out.println("la media dell'entropia delle categorie kmeans vale: " + entropia.mediaEntrCat(EntropiaCategorie, clustersNew));
+
+        Map<Integer, Double> EnCluRand = entropia.EntrClu(clustersRand, catfreperrand);
+        System.out.println("la media dell'entropia dei cluster random vale: " + entropia.mediaEntrClu(EnCluRand));
+
+        Map<String, Double>EnCatRand = entropia.EntrCat(catfreperrand, numClusters);
+        System.out.println("la media dell'entropia delle categorie vale: " + entropia.mediaEntrCat(EnCatRand, clustersRand));
+
+        System.out.println("Differenza Entropie Kmeans-Random");
+        System.out.println("Clusters: " + (entropia.mediaEntrClu(EntropiaClusters)-entropia.mediaEntrClu(EnCluRand)));
+        System.out.println("Categorie: " + (entropia.mediaEntrCat(EntropiaCategorie,clustersNew)-entropia.mediaEntrCat(EnCatRand, clustersRand)));
+
+
+
+
+
+
 
     }
 
