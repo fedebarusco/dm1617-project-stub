@@ -49,7 +49,7 @@ public class entropia {
                     entr = entr + formulacluster(mci, mc);
                 }
             }
-            entr = -entr;
+            if(entr!=0) entr = -entr;
 
             entropy.put(b._1(),entr);
             entr=0.0;
@@ -59,35 +59,33 @@ public class entropia {
 
     }
 
-    public static Map<String, Double> EntrCat(JavaPairRDD<WikiPage, Integer> clustersNew, JavaPairRDD<String, Integer[]> catfreperclu, int k){
+    public static Map<String, Double> EntrCat(/*JavaPairRDD<WikiPage, Integer> clustersNew, alla fine non serve nemmeno*/ JavaPairRDD<String, Integer[]> catfreperclu, int k){
         double entr=0.0;
         int mci;
         int mi;
         String temp;
-        JavaPairRDD<String, Integer> catfreq = Analyzer.getCategoriesFrequencies(clustersNew);
+        //JavaPairRDD<String, Integer> catfreq = Analyzer.getCategoriesFrequencies(clustersNew);
+        //riesco addirittura a fare una chiamata in meno! swag
 
         Map<String, Double>entropy = new HashMap<>();
 
-        //inizializzare la mappa
-        for(Tuple2<String, Integer> a: catfreq.collect())
+        //inizializzare la mappa, necessario altrimenti da errore
+        for(Tuple2<String, Integer[]> a: catfreperclu.collect())
             entropy.put(a._1(), 0.0);
 
-        for(Tuple2<String, Integer> a: catfreq.collect()){
-            mi = a._2();
+        for (Tuple2<String, Integer[]> a : catfreperclu.collect()){
             temp=a._1();
-            for (Tuple2<String, Integer[]> b : catfreperclu.collect()){
-                    if(b._1().equals(temp)) {
-                        for(int i=0; i<k; i++) {
-                            mci = b._2()[i];
-                            if (mci != 0) {
-                                entr = entr + formulacategorie(mci, mi);
-                                break;
-                            }
-                        }
-                    }
-                    break;
+            mi=0;
+            for(int i=0; i<k; i++) {
+                mci=a._2()[i];
+                if(mci!=0) {//solo se mci è !=0 calcolo mi, grande risparmio
+                    for (int j = 0; j < a._2().length; j++) mi = mi + a._2()[i];
+                    //poichè le componenti dell'array sono il numero di occorrenze della categoria nei vari cluster
+                    //calcolo mi sommando tutte le componenti dell'array
+                    entr = entr + formulacategorie(mci, mi);
+                }
             }
-            entr = -entr; //l'entropia è negativa
+            if(entr!=0) entr = -entr; //l'entropia è negativa, entr =0 significa TUTTI i punti del clusterino appartengono alla stessa categoria
             //ora inserisco nel'RDD in uscita
             entropy.put(temp, entr);
             entr = 0.0; //reset entr
@@ -95,6 +93,27 @@ public class entropia {
 
         return entropy;
 
+    }
+
+    public static double mediaEntrClu(Map<Integer, Double> entr){
+        double media=0.0;
+        for (int i=0; i<entr.size(); i++){
+            media = media + entr.get(i);
+        }
+        return media/entr.size();
+    }
+
+    public static double mediaEntrCat(Map<String, Double> entr, JavaPairRDD<WikiPage,Integer> clustersNew){
+
+        double media=0.0;
+
+        JavaPairRDD<String, Integer> catfreq = Analyzer.getCategoriesFrequencies(clustersNew);
+
+        for (Tuple2<String, Integer> a : catfreq.collect()){
+            media = media + entr.get(a._1());
+        }
+
+        return media/entr.size();
     }
 
 
@@ -187,7 +206,7 @@ public class entropia {
             //mi faccio sputare la mappa
 
             return entropy;
-        }//fine metodo
+        }
 
     public static Map<String, Double> NONUSAREcalcolaEntrCat(JavaPairRDD<WikiPage, Integer> clustersNew, int k){
         //k è il numero di cluster, lo prendiamo da input

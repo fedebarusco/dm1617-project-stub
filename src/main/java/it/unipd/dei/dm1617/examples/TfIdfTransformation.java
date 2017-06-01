@@ -28,7 +28,7 @@ public class TfIdfTransformation {
         //Set hadoop distribution directory
         //mettete ognuno il vostro percorso
         //percorso di giovanni:
-        //System.setProperty("hadoop.home.dir", "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mining\\progetto");
+        System.setProperty("hadoop.home.dir", "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mining\\progetto");
         //percorso di manu
         //System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
 
@@ -246,11 +246,22 @@ public class TfIdfTransformation {
         //Calcolo dell'entropia e confronto con entropia di un cluster casuale
 
         JavaPairRDD<String, Integer[]> catfreperclu = Analyzer.getCategoryFreqInAllClusters(clustersNew, numClusters);
-
+        /*
         Map<Integer, Double> EntropiaClusters = entropia.EntrClu(clustersNew, catfreperclu);
-        System.out.println("Entropia ultimata");
+
         for(int i=0; i< EntropiaClusters.size(); i++)
             System.out.println("Entropia del cluster " + i + " = " + EntropiaClusters.get(i));
+        System.out.println("la media dell'entropia dei cluster vale: " + entropia.mediaEntrClu(EntropiaClusters));
+        */
+        Map<String, Double>EntropiaCategorie = entropia.EntrCat(catfreperclu, numClusters);
+
+        //è un po problematico stampare le categorie
+        for(Tuple2<String, Integer[]> a: catfreperclu.collect()){
+            System.out.println("Entropia della categoria " + a._1() + " = " + EntropiaCategorie.get(a._1()));
+        }
+
+        System.out.println("la media dell'entropia delle categorie vale: " + entropia.mediaEntrCat(EntropiaCategorie, clustersNew));
+
 
         /*
         Map<String, Double>EntropiaCategorie=entropia.EntrCat(clustersNew, catfreperclu, numClusters);
