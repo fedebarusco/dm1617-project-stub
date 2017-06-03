@@ -216,6 +216,7 @@ public class Word2VecOurModel {
         System.out.println("il massimo numero di cluster che contengono una stessa categoria: " + max_cu);
 
         //categorie per cluster
+        /*
         ArrayList<Integer> size_categories = new ArrayList<>();
         JavaPairRDD<Integer, List<String>> groupedCategoriesByCluster = Analyzer.getCategoriesDistribution(clustersNew);
         for (Map.Entry<Integer, List<String>> e : groupedCategoriesByCluster.collectAsMap().entrySet()) {
@@ -244,14 +245,16 @@ public class Word2VecOurModel {
         System.out.println("k: " + clusters.k());
         System.out.println("media di categorie presenti in ciascun cluster: " + average);
         System.out.println("il massimo numero di categorie presenti in un cluster: " + max_cat);
+        */
 
         // Finally, we print the distance between the first two pages
+        /*
         List<Tuple2<WikiPage, Vector>> firstPages = pageAndVector.take(2);
         double dist = Distance.cosineDistance(firstPages.get(0)._2(), firstPages.get(1)._2());
         System.out.println("Cosine distance between `" +
                 firstPages.get(0)._1().getTitle() + "` and `" +
                 firstPages.get(1)._1().getTitle() + "` = " + dist);
-
+        */
         // Restituisce il Silhouette Coefficient relativo al dataset
         // Prob è un parametro che permette di decidere che percentuale di punti intendiamo utilizzare, utile se vogliamo snellire il procedimento
 

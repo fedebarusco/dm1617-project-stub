@@ -178,6 +178,7 @@ public class TfIdfTransformation {
         System.out.println("il massimo numero di cluster che contengono una stessa categoria: " + max_cu);
 
         //categorie per cluster
+        /*
         ArrayList<Integer> size_categories = new ArrayList<>();
         JavaPairRDD<Integer, List<String>> groupedCategoriesByCluster = Analyzer.getCategoriesDistribution(clustersNew);
         for (Map.Entry<Integer, List<String>> e : groupedCategoriesByCluster.collectAsMap().entrySet()) {
@@ -208,7 +209,7 @@ public class TfIdfTransformation {
         System.out.println("k: " + clusters.k());
         System.out.println("media di categorie presenti in ciascun cluster: " + average);
         System.out.println("il massimo numero di categorie presenti in un cluster: " + max_cat);
-
+        */
         /*
         for (Tuple2<WikiPage, Integer> p : clustersNew.collect()) {
             System.out.println(p._1().getTitle() + ", cluster: " + p._2());
