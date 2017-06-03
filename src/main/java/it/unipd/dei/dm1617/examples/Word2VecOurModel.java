@@ -37,13 +37,16 @@ public class Word2VecOurModel {
                 .setAppName("Word2VecModel");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
-        //Set hadoop distribution directory
+        //Imposto la 'hadoop distribution directory'
+        //percorso di Giovanni:
+        //System.setProperty("hadoop.home.dir", "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mining\\progetto");
+        //percorso di Emanuele;
         System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
 
         // Load dataset of pages
         JavaRDD<WikiPage> pages = InputOutput.read(sc, dataPath);
 
-        //quante pagine (dataset) ci sono nel dataset
+        //quante pagine ci sono nel dataset
         long num_pages = pages.count();
         System.out.println("numero di pagine presenti nel dataset: " + num_pages);
 

@@ -27,12 +27,10 @@ import java.util.*;
 * */
 public class TfIdfTransformation {
 
-
     public static void main(String[] args) {
         String dataPath = args[0];
 
-        //Set hadoop distribution directory
-        //mettete ognuno il vostro percorso
+        //Imposto la 'hadoop distribution directory'
         //percorso di Giovanni:
         //System.setProperty("hadoop.home.dir", "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mining\\progetto");
         //percorso di Emanuele;
@@ -274,8 +272,8 @@ public class TfIdfTransformation {
         // Note that we are using `mapToPair` instead of `map`, since
         // it returns a `JavaPairRDD` object, which has methods specialized
         // to work on key-value pairs, like the `reduceByKey` operation we use here.
-        JavaPairRDD<String[], Integer> dCounts = cat
-                .mapToPair((w) -> new Tuple2<>(w, 1))
-                .reduceByKey((x, y) -> x + y);
+        //JavaPairRDD<String[], Integer> dCounts = cat
+        //        .mapToPair((w) -> new Tuple2<>(w, 1))
+        //        .reduceByKey((x, y) -> x + y);
     }
 }
