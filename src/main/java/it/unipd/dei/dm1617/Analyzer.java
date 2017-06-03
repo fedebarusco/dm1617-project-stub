@@ -12,7 +12,7 @@ import scala.Tuple2;
 import java.util.*;
 
 /*
-* La classe Analyzer contiene tutte le funzioni che attraverso l'utilizzo di spark restituiscono i valori necessari.
+* La classe Analyzer contiene tutte le funzioni che attraverso l'utilizzo dei metodi di Spark restituiscono i valori necessari.
 * */
 public class Analyzer {
 
