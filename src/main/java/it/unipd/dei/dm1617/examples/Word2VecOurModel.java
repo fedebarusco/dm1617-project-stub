@@ -100,7 +100,7 @@ public class Word2VecOurModel {
         //model.save(sc.sc(), path_model);
         //System.out.println("modello Word2Vec salvato");
 
-        JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
+        JavaPairRDD<WikiPage, Vector> pagesAndVectors = pageAndLemma.mapToPair(pair -> {
             int i = 0;
             Vector docvec = null;
             for (String lemma : pair._2()) {
@@ -123,17 +123,17 @@ public class Word2VecOurModel {
             return new Tuple2<WikiPage, Vector>(pair._1(), docvec);
         });
 
-        pageAndVector = pageAndVector.filter(pair -> {
+        pagesAndVectors = pagesAndVectors.filter(pair -> {
             return pair != null && pair._2() != null && pair._1() != null;
         }).cache();
 
-        for (Tuple2<WikiPage, Vector> el : pageAndVector.collect()) {
+        for (Tuple2<WikiPage, Vector> el : pagesAndVectors.collect()) {
             System.out.println(el._1().getTitle());
             System.out.println(el._2());
         }
         System.out.println();
 
-        JavaRDD<Vector> data = pageAndVector.map(pair -> pair._2());
+        JavaRDD<Vector> data = pagesAndVectors.map(pair -> pair._2());
 
         // Cluster the data into two classes using KMeans
         /*
@@ -169,14 +169,14 @@ public class Word2VecOurModel {
         }
 
         //creo un cluster random
-        RandomCluster random = new RandomCluster(pageAndVector, numClusters);
+        RandomCluster random = new RandomCluster(pagesAndVectors, numClusters);
 
         /*
             Map del le coppie (pagina, vettore) utilizzando il modello creato prima e il metodo predict
             che prendendo come argomento il vettore corrispondente alla pagina restituisce il cluster, l'RDD
             restituita alla fine è la coppia (pagina, indice del cluster corrispondente)
          */
-        JavaPairRDD<WikiPage, Integer> clustersNew = pageAndVector.mapToPair(pav -> {
+        JavaPairRDD<WikiPage, Integer> clustersNew = pagesAndVectors.mapToPair(pav -> {
             return new Tuple2<WikiPage, Integer>(pav._1(), clusters.predict(pav._2()));
         });
         /*
@@ -215,57 +215,17 @@ public class Word2VecOurModel {
         System.out.println("media dei cluster contenenti una stessa categoria: " + average_cu);
         System.out.println("il massimo numero di cluster che contengono una stessa categoria: " + max_cu);
 
-        //categorie per cluster
-        /*
-        ArrayList<Integer> size_categories = new ArrayList<>();
-        JavaPairRDD<Integer, List<String>> groupedCategoriesByCluster = Analyzer.getCategoriesDistribution(clustersNew);
-        for (Map.Entry<Integer, List<String>> e : groupedCategoriesByCluster.collectAsMap().entrySet()) {
-            int clusterId = e.getKey();
-            List<String> categories = e.getValue();
-            size_categories.add(categories.size());
-            System.out.println(categories.size() + " distinct categories found in cluster " + clusterId);
-        }
-
-        int size_c = 0;
-        int max_cat = size_categories.get(0);
-        for (int i = 0; i < size_categories.size(); i++) {
-            if (max_cat < size_categories.get(i)) {
-                max_cat = size_categories.get(i);
-            }
-            size_c += size_categories.get(i);
-        }
-        size_categories.sort(Integer::compareTo);
-        for (int i = 0; i < size_categories.size(); i++) {
-            System.out.println("categorie ordinate: " + size_categories.get(i));
-        }
-        int mediam = size_categories.get((int) (size_categories.size() / 2));
-        System.out.println("mediana: " + mediam);
-        double average = size_c / clusters.k();
-        System.out.println("categorie (con ripetizioni) presenti nei cluster: " + size_c);
-        System.out.println("k: " + clusters.k());
-        System.out.println("media di categorie presenti in ciascun cluster: " + average);
-        System.out.println("il massimo numero di categorie presenti in un cluster: " + max_cat);
-        */
-
-        // Finally, we print the distance between the first two pages
-        /*
-        List<Tuple2<WikiPage, Vector>> firstPages = pageAndVector.take(2);
-        double dist = Distance.cosineDistance(firstPages.get(0)._2(), firstPages.get(1)._2());
-        System.out.println("Cosine distance between `" +
-                firstPages.get(0)._1().getTitle() + "` and `" +
-                firstPages.get(1)._1().getTitle() + "` = " + dist);
-        */
         // Restituisce il Silhouette Coefficient relativo al dataset
         // Prob è un parametro che permette di decidere che percentuale di punti intendiamo utilizzare, utile se vogliamo snellire il procedimento
 
-        double s = Silhouette.getSilhouette(pageAndVector, clusters, 10);
+        double s = Silhouette.getSilhouette(pagesAndVectors, clusters, 10);
         System.out.printf("Total Silhouette: %f\n", s);
 
         //calcola il silhouette coefficient sul cluster random
-        double sr = SilhouetteOnRandom.getSilhouette(pageAndVector, random, 10);
+        double sr = SilhouetteOnRandom.getSilhouette(pagesAndVectors, random, 10);
         System.out.printf("Total Silhouette: %f\n", sr);
 
-        JavaPairRDD<WikiPage, Integer> clustersRand = pageAndVector.mapToPair(pav -> {
+        JavaPairRDD<WikiPage, Integer> clustersRand = pagesAndVectors.mapToPair(pav -> {
             return new Tuple2<WikiPage, Integer>(pav._1(), RandomCluster.predict(pav._2()));
         });
 
@@ -289,6 +249,38 @@ public class Word2VecOurModel {
         System.out.println("Differenza Entropie Kmeans-Random");
         System.out.println("Clusters: " + (entropia.mediaEntrClu(EntropiaClusters)-entropia.mediaEntrClu(EnCluRand)));
         System.out.println("Categorie: " + (entropia.mediaEntrCat(EntropiaCategorie,clustersNew)-entropia.mediaEntrCat(EnCatRand, clustersRand)));
+
+        //Calcolo del WCSS che valuta il clustering k-means
+        Map<WikiPage, Vector> temp = pagesAndVectors.collectAsMap();
+        double media = 0.0;
+        double randmedia = 0.0;
+        double tosquare = 0.0;
+        //da definizione è complesso assai, k^2*wikipages
+        for(int i=0; i<numClusters; i++){
+            for(Vector center : clusters.clusterCenters()){
+                for (Tuple2<WikiPage, Integer> wp : clustersNew.collect()) {
+                    if (wp._2()==i){
+                        tosquare=Distance.euclidianDistance(center, temp.get(wp._1()));
+                        media=media+ (tosquare*tosquare);
+                    }
+                }
+            }
+        }//fine for più esterno
+        System.out.println("WCSS - Media calcolata cluster k-means = " + media);
+
+        for(int i=0; i<numClusters; i++){
+            for(Vector center : random.clusterCenters()){
+                for (Tuple2<WikiPage, Integer> wp : clustersRand.collect()) {
+                    if (wp._2()==i){
+                        tosquare=Distance.euclidianDistance(center, temp.get(wp._1()));
+                        randmedia= randmedia+ (tosquare*tosquare);
+                    }
+                }
+            }
+        }//fine for più esterno
+
+        System.out.println("WCSS - Media calcolata cluster k-means = " + media);
+        System.out.println("WCSS - Media calcolata cluster random = " + randmedia);
     }
 
     //metodo che implementa la somma tra oggetti Vector

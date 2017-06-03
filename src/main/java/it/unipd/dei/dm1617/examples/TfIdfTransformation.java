@@ -142,12 +142,12 @@ public class TfIdfTransformation {
             return new Tuple2<WikiPage, Integer>(pav._1(), clusters.predict(pav._2()));
         });
 
-        //crea un cluster random
-        RandomCluster random = new RandomCluster(pagesAndVectors, numClusters);
-
         //numero categorie distinte
         int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
         System.out.println("numero di categorie totali distinte:" + size);
+
+        //creo un cluster random
+        RandomCluster random = new RandomCluster(pagesAndVectors, numClusters);
 
         //compute in how many clusters a category is split
         ArrayList<Integer> size_cluster = new ArrayList<>();
@@ -176,53 +176,6 @@ public class TfIdfTransformation {
         System.out.println("k: " + clusters.k());
         System.out.println("media dei cluster contenenti una stessa categoria: " + average_cu);
         System.out.println("il massimo numero di cluster che contengono una stessa categoria: " + max_cu);
-
-        //categorie per cluster
-        /*
-        ArrayList<Integer> size_categories = new ArrayList<>();
-        JavaPairRDD<Integer, List<String>> groupedCategoriesByCluster = Analyzer.getCategoriesDistribution(clustersNew);
-        for (Map.Entry<Integer, List<String>> e : groupedCategoriesByCluster.collectAsMap().entrySet()) {
-            int clusterId = e.getKey();
-            List<String> categories = e.getValue();
-            size_categories.add(categories.size());
-            System.out.println(categories.size() + " distinct categories found in cluster " + clusterId);
-        }
-
-        //media delle categorie (con ripetizioni) presenti in ciascun cluster
-        int size_c = 0;
-        int max_cat = size_categories.get(0);
-        for(int i= 0; i < size_categories.size(); i++){
-            if(max_cat < size_categories.get(i)){
-                max_cat = size_categories.get(i);
-            }
-            size_c+=size_categories.get(i);
-        }
-        //metto in ordine crescente le categorie per ogni cluster
-        size_categories.sort(Integer::compareTo);
-        for(int i= 0; i < size_categories.size(); i++){
-            System.out.println("categorie ordinate: " + size_categories.get(i));
-        }
-        int mediam = size_categories.get((int)(size_categories.size()/2));
-        System.out.println("mediana: " + mediam);
-        double average = size_c/clusters.k();
-        System.out.println("categorie (con ripetizioni) presenti nei cluster: " + size_c);
-        System.out.println("k: " + clusters.k());
-        System.out.println("media di categorie presenti in ciascun cluster: " + average);
-        System.out.println("il massimo numero di categorie presenti in un cluster: " + max_cat);
-        */
-        /*
-        for (Tuple2<WikiPage, Integer> p : clustersNew.collect()) {
-            System.out.println(p._1().getTitle() + ", cluster: " + p._2());
-        }
-        */
-        // Finally, we print the distance between the first two pages
-        /*
-        List<Tuple2<WikiPage, Vector>> firstPages = pagesAndVectors.take(2);
-        double dist = Distance.cosineDistance(firstPages.get(0)._2(), firstPages.get(1)._2());
-        System.out.println("Cosine distance between `" +
-                firstPages.get(0)._1().getTitle() + "` and `" +
-                firstPages.get(1)._1().getTitle() + "` = " + dist);
-        */
 
         // Get text out of pages
         JavaRDD<String[]> cat = pages.map((p) -> p.getCategories());
@@ -268,6 +221,38 @@ public class TfIdfTransformation {
         System.out.println("Differenza Entropie Kmeans-Random");
         System.out.println("Clusters: " + (entropia.mediaEntrClu(EntropiaClusters)-entropia.mediaEntrClu(EnCluRand)));
         System.out.println("Categorie: " + (entropia.mediaEntrCat(EntropiaCategorie,clustersNew)-entropia.mediaEntrCat(EnCatRand, clustersRand)));
+
+        //Calcolo del WCSS che valuta il clustering k-means
+        Map<WikiPage, Vector> temp = pagesAndVectors.collectAsMap();
+        double media = 0.0;
+        double randmedia = 0.0;
+        double tosquare = 0.0;
+        //da definizione è complesso assai, k^2*wikipages
+        for(int i=0; i<numClusters; i++){
+            for(Vector center : clusters.clusterCenters()){
+                for (Tuple2<WikiPage, Integer> wp : clustersNew.collect()) {
+                    if (wp._2()==i){
+                        tosquare=Distance.euclidianDistance(center, temp.get(wp._1()));
+                        media=media+ (tosquare*tosquare);
+                    }
+                }
+            }
+        }//fine for più esterno
+        System.out.println("WCSS - Media calcolata cluster k-means = " + media);
+
+        for(int i=0; i<numClusters; i++){
+            for(Vector center : random.clusterCenters()){
+                for (Tuple2<WikiPage, Integer> wp : clustersRand.collect()) {
+                    if (wp._2()==i){
+                        tosquare=Distance.euclidianDistance(center, temp.get(wp._1()));
+                        randmedia= randmedia+ (tosquare*tosquare);
+                    }
+                }
+            }
+        }//fine for più esterno
+
+        System.out.println("WCSS - Media calcolata cluster k-means = " + media);
+        System.out.println("WCSS - Media calcolata cluster random = " + randmedia);
 
         // Now we can apply the MR algorithm for word count.
         // Note that we are using `mapToPair` instead of `map`, since
