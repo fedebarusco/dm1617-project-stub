@@ -15,7 +15,7 @@ Struttura del progetto
 
 Questo progetto contiene classi già implementate forniteci come base di partenza
 e classi create da noi. Le classi già implementate servono per: l'utilizzo di 
-WikiPage, la Lemmatizzazione, l'Input/Output, TfIdf, Cosine 
+WikiPage, la Lemmatizzazione, l'Input/Output, il modello TfIdf, la Cosine 
 Distance e altro ancora. Invece, le classi implementate da noi sono:
  - Word2VecOurModel: implementa l'utilizzo del modello Word2Vec, effettua il preprocessing 
  descritto nella relazione sulle pagine, parole e categorie, crea il cluster k-means per un
