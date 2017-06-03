@@ -47,3 +47,21 @@ contenute in `it.unipd.dei.dm1617`.
 Descrizione dell'output
 -----------------
 
+Sia in TfIdfTransformation che in Word2VecOurModel otteniamo in output la stessa tipologia
+di dati, la loro differenza è argomentata nella relazione:
+ - numero di pagine presenti nel dataset;
+ - numero di pagine presenti nel dataset dopo il preprocessing (va ricordato che con Word2Vec
+ non sono comprese le parole che si ripetono meno di 2 volte);
+ - numero di categorie totali (distinte) presenti nel dataset;
+ - media dei cluster contenenti una stessa categoria (usata per il calcolo di 1/c(category));
+ - il Silhouette Coefficient sul cluster generato con kmeans;
+ - il silhouette coefficient sul cluster random;
+ - media dell'Entropia dei cluster di kmeans;
+ - media dell'Entropia delle categorie di kmeans;
+ - media dell'Entropia dei cluster del cluster random;
+ - media dell'Entropia delle categorie del cluster random;
+ - differenza delle Entropie Kmeans-ClusterRandom sia per quanto riguarda le categoria sia per
+ i cluster.
+ 
+ Le sezioni per il salvataggio del modello di Word2Vec e per l'impostazione della
+ cartella di hadoop (sotto Windows) sono state commentate.
