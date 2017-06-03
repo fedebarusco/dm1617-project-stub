@@ -8,9 +8,6 @@ public class Distance {
   /**
    * Cosine distance between vectors where all the elements are positive.
    */
-  /*
-    Per la distanza tra documenti si usa molto anche
-   */
   public static double cosineDistance(Vector a, Vector b) {
     if (a.size() != b.size()) {
       throw new IllegalArgumentException("Vectors should be in the same space");
@@ -24,10 +21,10 @@ public class Distance {
 
     double cosine = num / (normA * normB);
     /*
-Mathematically, this should't be possible, but due to the
-propagation of errors in floating point operations, it
-happens
-*/
+    Mathematically, this should't be possible, but due to the
+    propagation of errors in floating point operations, it
+    happens
+    */
     if (cosine > 1.0) cosine = 1;
     // If you wish to use this function with vectors that can have
     // negative components (like the ones given by word2vec), then
@@ -35,6 +32,9 @@ happens
     return (2 / Math.PI) * Math.acos(cosine);
   }
 
+  /*
+  * Calcolo la distanza euclidea tra due ogetti Vector
+  * */
   public static double euclidianDistance(Vector a, Vector b) {
     int length = a.size();
     if (length != b.size()) {

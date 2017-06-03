@@ -19,6 +19,12 @@ import java.util.*;
 /**
  * Example program to show the basic usage of some Spark utilities.
  */
+/*
+* La classe TfIdfTransformation:
+* implementa l'utilizzo del modello TfIdf e di k-means;
+* calcola ciò che serve per il calcolo di 1/c(cat);
+* richiama le funzioni per il calcolo di Entropia e di Silhouette per k-means e per il cluster random.
+* */
 public class TfIdfTransformation {
 
 
@@ -27,28 +33,24 @@ public class TfIdfTransformation {
 
         //Set hadoop distribution directory
         //mettete ognuno il vostro percorso
-        //percorso di giovanni:
-        System.setProperty("hadoop.home.dir", "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mining\\progetto");
-        //percorso di manu
-        //System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
+        //percorso di Giovanni:
+        //System.setProperty("hadoop.home.dir", "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mining\\progetto");
+        //percorso di Emanuele;
+        System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
 
         // Usual setup
         SparkConf conf = new SparkConf(true).setAppName("Tf-Ifd transformation");
         JavaSparkContext sc = new JavaSparkContext(conf);
 
-         // Load dataset of pages
+        // Load dataset of pages
         JavaRDD<WikiPage> pages = InputOutput.read(sc, dataPath);
 
         //quante pagine ci sono nel dataset
         long num_pages = pages.count();
         System.out.println("numero di pagine presenti nel dataset: " + num_pages);
 
-        //preprocessing category
+        //Inizio preprocessing
         pages = Analyzer.cleanCategories(pages, 1, 10000, sc);
-
-        //quante pagine ci sono nel dataset dopo il preprocessing sul numero di pagine nelle categorie
-        long num_pages1 = pages.count();
-        System.out.println("numero di pagine presenti nel dataset dopo: " + num_pages1);
 
         // Get text out of pages
         JavaRDD<String> texts = pages.map((p) -> p.getText());
@@ -72,6 +74,10 @@ public class TfIdfTransformation {
             }
             return filtered;
         });
+        //Fine preprocessing
+
+        long num_pages1 = pages.count();
+        System.out.println("numero di pagine presenti nel dataset dopo il preprocessing: " + num_pages1);
 
         //String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\model_tfidf";
         //String path_model = "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mininig\\progetto\\modelw2v";
@@ -145,8 +151,6 @@ public class TfIdfTransformation {
         int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
         System.out.println("numero di categorie totali distinte:" + size);
 
-
-
         //compute in how many clusters a category is split
         ArrayList<Integer> size_cluster = new ArrayList<>();
         JavaPairRDD<String, List<Integer>> tmp = Analyzer.getNumberOfClustersPerCat(clustersNew);
@@ -211,14 +215,15 @@ public class TfIdfTransformation {
         for (Tuple2<WikiPage, Integer> p : clustersNew.collect()) {
             System.out.println(p._1().getTitle() + ", cluster: " + p._2());
         }
-*/
+        */
         // Finally, we print the distance between the first two pages
+        /*
         List<Tuple2<WikiPage, Vector>> firstPages = pagesAndVectors.take(2);
         double dist = Distance.cosineDistance(firstPages.get(0)._2(), firstPages.get(1)._2());
         System.out.println("Cosine distance between `" +
                 firstPages.get(0)._1().getTitle() + "` and `" +
                 firstPages.get(1)._1().getTitle() + "` = " + dist);
-
+        */
 
         // Get text out of pages
         JavaRDD<String[]> cat = pages.map((p) -> p.getCategories());
@@ -232,7 +237,6 @@ public class TfIdfTransformation {
             }
             System.out.println();
         }
-
 
         //calcola il silhouette coefficient sul cluster generato con kmeans
         double s = Silhouette.getSilhouette(pagesAndVectors, clusters, 10);
@@ -273,29 +277,5 @@ public class TfIdfTransformation {
         JavaPairRDD<String[], Integer> dCounts = cat
                 .mapToPair((w) -> new Tuple2<>(w, 1))
                 .reduceByKey((x, y) -> x + y);
-
-
-/*
-        class TupleComparator implements Comparator<Tuple2<String, Integer>>, Serializable {
-            @Override
-            public int compare(Tuple2<String, Integer> t1, Tuple2<String, Integer> t2) {
-                return t1._2().compareTo(t2._2());
-            }
-        }
-
-
-        // Instead of sorting and collecting _all_ the values on the master
-        // machine, we take only the top 100 words by count.
-        // In general this operation is safer, since we can bound the number
-        // of elements that are collected by the master, thus avoiding OutOfMemory errors
-        List<Tuple2<String[], Integer>> lTopCounts = dCounts.top(500, new TupleComparator());
-        lTopCounts.forEach((tuple) -> {
-            String[] word = tuple._1();
-            int count = tuple._2();
-            System.out.println(word + " :: " + count);
-        });
-
-*/
     }
-
 }

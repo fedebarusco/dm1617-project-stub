@@ -18,7 +18,9 @@ import scala.Tuple2;
 
 import java.util.*;
 
-
+/*
+* Classe che implementa i metodi per il calcolo del Silhouette Coefficient per k-means.
+* */
 public class Silhouette {
 
     static double[] valuesOnCluster;
@@ -51,7 +53,6 @@ public class Silhouette {
         long numPoints = 0L;
         int j = 0;
 
-
         for (Map.Entry<Integer, List<Vector>> cluster : pointsByID.entrySet()) {
 
             List<Vector> pointsInCluster = cluster.getValue();
@@ -73,9 +74,7 @@ public class Silhouette {
                 }
                 System.out.println("Il silhouette coefficent del cluster " + cluster.getKey() + " vale: " + clusterAvg);
                 valuesOnCluster[cluster.getKey()] = clusterAvg;
-
             }
-
         }
 
         double medianOnCluster = medianValueOnCluster();
@@ -83,7 +82,6 @@ public class Silhouette {
 
         double medianOnPoints = medianValueOnPoints();
         System.out.println("Il valore della mediana sui punti è: " + medianOnPoints);
-
 
         if(numPoints == 0) {
             return 0.0;
@@ -150,7 +148,7 @@ public class Silhouette {
             return valuesOnCluster[valuesOnCluster.length/2];
     }
 
-    //Metodo che restituisce la mediana del silhouette coefficient calcolato sui punti. Più interessante.
+    //Metodo che restituisce la mediana del silhouette coefficient calcolato sui punti.
     private static double medianValueOnPoints(){
         Arrays.sort(valuesOnPoints);
         if ((valuesOnPoints.length % 2) == 0)

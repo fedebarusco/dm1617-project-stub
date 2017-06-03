@@ -11,13 +11,17 @@ import scala.Tuple2;
 
 import java.util.*;
 
+/*
+* La classe Analyzer contiene tutte le funzioni che attraverso l'utilizzo di spark restituiscono i valori necessari.
+* */
 public class Analyzer {
 
+    /*
+    * prendo il numero di pagine appartenenti ad una certa categoria nei vari cluster
+    * */
     public static int getNumberOfDocsInClusterPerCat(String cat, int clusterIdx, JavaPairRDD<WikiPage, Integer> clusters) {
         return clusters.filter(t -> (t._2() == clusterIdx) && (Arrays.asList(t._1().getCategories()).contains(cat))).collect().size();
-    }//controlla che non sovrascrive il cluster
-    //chiamare size() prima e dopo
-
+    }
 
     public static JavaPairRDD<String, Integer[]> getCategoryFreqInAllClusters(JavaPairRDD<WikiPage, Integer> clusters, int totalClustersNum) {
         /*
@@ -51,9 +55,6 @@ public class Analyzer {
         }
         return res;
     }
-
-
-
 
     /**
      * Elimina da ciascun oggetto wikipage le categorie che compaiono nel dataset con frequenza al di fuori  delle soglie specificate.

@@ -16,7 +16,9 @@ import scala.Tuple2;
 
 import java.util.*;
 
-
+/*
+* Classe che implementa i metodi per il calcolo del Silhouette Coefficient in un cluster random.
+* */
 public class SilhouetteOnRandom {
 
     static double[] valuesOnCluster;

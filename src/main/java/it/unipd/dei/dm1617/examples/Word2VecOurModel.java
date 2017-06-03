@@ -21,7 +21,12 @@ import org.apache.spark.mllib.regression.LabeledPoint;
 import java.io.File;
 import java.util.*;
 
-
+/*
+* La classe Word2VecOurModel:
+* implementa l'utilizzo del modello Word2Vec e di k-means;
+* calcola ciò che serve per il calcolo di 1/c(cat);
+* richiama le funzioni per il calcolo di Entropia e di Silhouette per k-means e per il cluster random.
+* */
 public class Word2VecOurModel {
     public static void main(String[] args) {
         String dataPath = args[0];
@@ -33,7 +38,7 @@ public class Word2VecOurModel {
         JavaSparkContext sc = new JavaSparkContext(conf);
 
         //Set hadoop distribution directory
-        //System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
+        System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
 
         // Load dataset of pages
         JavaRDD<WikiPage> pages = InputOutput.read(sc, dataPath);
@@ -42,12 +47,8 @@ public class Word2VecOurModel {
         long num_pages = pages.count();
         System.out.println("numero di pagine presenti nel dataset: " + num_pages);
 
-        //preprocessing category
+        //Inizio preprocessing
         pages = Analyzer.cleanCategories(pages, 1, 10000, sc);
-
-        //quante pagine ci sono nel dataset dopo il preprocessing sul numero di pagine nelle categorie
-        long num_pages1 = pages.count();
-        System.out.println("numero di pagine presenti nel dataset dopo: " + num_pages1);
 
         // Get text out of pages
         JavaRDD<String> texts = pages.map((p) -> p.getText());
@@ -71,8 +72,12 @@ public class Word2VecOurModel {
             }
             return filtered;
         });
+        //Fine preprocessing
 
         JavaPairRDD<WikiPage, ArrayList<String>> pageAndLemma = pages.zip(lemmas);
+
+        long num_pages1 = pages.count();
+        System.out.println("numero di pagine presenti nel dataset dopo il preprocessing: " + num_pages1);
 
         //String path_model = "C:\\Users\\Emanuele\\Desktop\\data\\model_word2vec";
         //String path_model = "/Users/federicobarusco/Documents/DM_Project";
@@ -81,20 +86,16 @@ public class Word2VecOurModel {
 
         //caricamento del modello di Word2Vec salvato
         //Word2VecModel model = Word2VecModel.load(sc.sc(), path_model);
-        //System.out.println("carico modello word2vec");
-
-        //Word2VecModel sameModel = Word2VecModel.load(sc.sc(), path_model);
+        //System.out.println("modello word2vec caricato");
 
         Word2VecModel model = word2vec
                 .setVectorSize(100)
-                //nel modello consideriamo solo le parole che si ripetono più di 2 volte (>=2) questo per la legge di Zipf (da approfondire)
-                .setMinCount(2) // il default è 5 se si vuole lasciare 5 bisogna levare le pagine che danno problemi
+                .setMinCount(2)
                 .fit(lemmas);
 
         //savataggio del modello Word2Vec
         //model.save(sc.sc(), path_model);
-        //System.out.println("modello salvato Word2Vec");
-
+        //System.out.println("modello Word2Vec salvato");
 
         JavaPairRDD<WikiPage, Vector> pageAndVector = pageAndLemma.mapToPair(pair -> {
             int i = 0;
@@ -116,15 +117,12 @@ public class Word2VecOurModel {
                 }
             }
             System.out.println("Parole perse perchè non contenute nel vocabolario di scala:" + i);
-            //i=0;
             return new Tuple2<WikiPage, Vector>(pair._1(), docvec);
         });
 
         pageAndVector = pageAndVector.filter(pair -> {
             return pair != null && pair._2() != null && pair._1() != null;
         }).cache();
-        // provare vari valori di k e vedere la qualità del cluster
-        //influenza di k sul clustering
 
         for (Tuple2<WikiPage, Vector> el : pageAndVector.collect()) {
             System.out.println(el._1().getTitle());
@@ -163,11 +161,11 @@ public class Word2VecOurModel {
         }
         // here is what I added to predict data points that are within the clusters
         List<Integer> L = clusters.predict(data).collect();
-        /*for (Integer i : L) {
+        for (Integer i : L) {
             System.out.println(i);
-        }*/
+        }
 
-        //crea un cluster random
+        //creo un cluster random
         RandomCluster random = new RandomCluster(pageAndVector, numClusters);
 
         /*
@@ -178,17 +176,17 @@ public class Word2VecOurModel {
         JavaPairRDD<WikiPage, Integer> clustersNew = pageAndVector.mapToPair(pav -> {
             return new Tuple2<WikiPage, Integer>(pav._1(), clusters.predict(pav._2()));
         });
-/*
+        /*
         for (Tuple2<WikiPage, Integer> p : clustersNew.collect()) {
             System.out.println(p._1().getTitle() + ", cluster: " + p._2());
         }
-*/
-        //per ogni categoria vedere in quanti cluster è spezzata
+        */
+
         //numero categorie distinte
         int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
         System.out.println("numero di categorie totali distinte:" + size);
 
-        //compute in how many clusters a category is split
+        //tovo in quanti cluster viene sparsa una categoria
         ArrayList<Integer> size_cluster = new ArrayList<>();
         JavaPairRDD<String, List<Integer>> tmp = Analyzer.getNumberOfClustersPerCat(clustersNew);
         for (Map.Entry<String, List<Integer>> e : tmp.collectAsMap().entrySet()) {
@@ -197,7 +195,6 @@ public class Word2VecOurModel {
             size_cluster.add(clustersList.size());
             System.out.println("Category \"" + cat + "\" was found in " + clustersList.size() + " clusters.");
         }
-        //in media una categoria è stata trovata in tot cluster
         int size_cu = 0;
         int max_cu = size_cluster.get(0);
         for (int i = 0; i < size_cluster.size(); i++) {
@@ -206,7 +203,6 @@ public class Word2VecOurModel {
             }
             size_cu += size_cluster.get(i);
         }
-        //metto in ordine crescente il numero di cluster
         size_cluster.sort(Integer::compareTo);
         int mediam_cu = size_cluster.get((int) (size_cluster.size() / 2));
         System.out.println("mediana dei cluster contenenti una stessa categoria: " + mediam_cu);
@@ -226,7 +222,6 @@ public class Word2VecOurModel {
             System.out.println(categories.size() + " distinct categories found in cluster " + clusterId);
         }
 
-        //media delle categorie (con ripetizioni) presenti in ciascun cluster
         int size_c = 0;
         int max_cat = size_categories.get(0);
         for (int i = 0; i < size_categories.size(); i++) {
@@ -254,8 +249,7 @@ public class Word2VecOurModel {
                 firstPages.get(0)._1().getTitle() + "` and `" +
                 firstPages.get(1)._1().getTitle() + "` = " + dist);
 
-        // Get Silhouette coefficient
-        // Restituisce il silhouette coefficient relativo al dataset
+        // Restituisce il Silhouette Coefficient relativo al dataset
         // Prob è un parametro che permette di decidere che percentuale di punti intendiamo utilizzare, utile se vogliamo snellire il procedimento
 
         double s = Silhouette.getSilhouette(pageAndVector, clusters, 10);
@@ -289,16 +283,9 @@ public class Word2VecOurModel {
         System.out.println("Differenza Entropie Kmeans-Random");
         System.out.println("Clusters: " + (entropia.mediaEntrClu(EntropiaClusters)-entropia.mediaEntrClu(EnCluRand)));
         System.out.println("Categorie: " + (entropia.mediaEntrCat(EntropiaCategorie,clustersNew)-entropia.mediaEntrCat(EnCatRand, clustersRand)));
-
-
-
-
-
-
-
     }
 
-
+    //metodo che implementa la somma tra oggetti Vector
     public static Vector sumVectors(Vector v1, Vector v2) {
         int size = v1.toArray().length;
         double[] sum = new double[size];
