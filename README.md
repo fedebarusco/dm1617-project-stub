@@ -64,5 +64,5 @@ di dati:
  i cluster.
  
  Le sezioni per il salvataggio del modello di Word2Vec e per l'impostazione della
- cartella di hadoop (sotto Windows) sono state commentate.
+ cartella di hadoop (sotto Windows) sono state commentate.\
  Nella relazione sono argomentati i risultati ottenuti e la differenza tra i due modelli.
