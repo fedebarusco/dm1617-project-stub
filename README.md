@@ -42,13 +42,13 @@ euclidea tra due oggetti Vector.
 Le classi entropia, RandomCluster, Sample, Silhouette, SilhouetteOnRandom, 
 TfIdfTransformation e Word2VecOurModel sono contenute nel package `it.unipd.dei.dm1617.examples`.
 Mentre le classi Analyzer, CountVectorizer, Distance, InputOutput, Lemmatizere WikiPage sono
-contenute in `it.unipd.dei.dm1617`.
+contenute nel package `it.unipd.dei.dm1617`.
 
 Descrizione dell'output
 -----------------
 
 Sia in TfIdfTransformation che in Word2VecOurModel otteniamo in output la stessa tipologia
-di dati, la loro differenza è argomentata nella relazione:
+di dati:
  - numero di pagine presenti nel dataset;
  - numero di pagine presenti nel dataset dopo il preprocessing (va ricordato che con Word2Vec
  non sono comprese le parole che si ripetono meno di 2 volte);
@@ -65,3 +65,4 @@ di dati, la loro differenza è argomentata nella relazione:
  
  Le sezioni per il salvataggio del modello di Word2Vec e per l'impostazione della
  cartella di hadoop (sotto Windows) sono state commentate.
+ Nella relazione sono argomentati i risultati ottenuti e la differenza tra i due modelli.
