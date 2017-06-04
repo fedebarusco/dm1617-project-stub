@@ -11,6 +11,7 @@ import org.apache.spark.mllib.clustering.KMeans;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.feature.IDF;
 import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.rdd.RDD;
 import scala.Serializable;
 import scala.Tuple2;
 
@@ -120,10 +121,11 @@ public class TfIdfTransformation {
         JavaPairRDD<WikiPage, Vector> pagesAndVectors = pages.zip(tfidf);
 
         // Cluster the data into two classes using KMeans
-        int numClusters = 100;
+        int numClusters = 2;
         int numIterations = 20;
         KMeansModel clusters = KMeans.train(tfidf.rdd(), numClusters, numIterations);
 
+        /*
         System.out.println("Cluster centers:");
         for (Vector center : clusters.clusterCenters()) {
             System.out.println(" " + center);
@@ -133,6 +135,7 @@ public class TfIdfTransformation {
         for (Integer i : L) {
             System.out.println(i);
         }
+        */
 
         /* Map delle coppie (pag, vettore) utilizzando il modello creato prima e il metodo predict
         che prendendo come argomento il vettore corrispondente alla pg restituisce il cluster, l'RDD
@@ -145,6 +148,11 @@ public class TfIdfTransformation {
         //numero categorie distinte
         int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
         System.out.println("numero di categorie totali distinte:" + size);
+
+        //Calcolo del valore della funzione obiettivo
+        RDD<Vector> data2= tfidf.rdd();
+        double f_obiettivo = clusters.computeCost(data2);
+        System.out.println("Esito di compute cost: " + f_obiettivo);
 
         //creo un cluster random
         RandomCluster random = new RandomCluster(pagesAndVectors, numClusters);
@@ -222,7 +230,13 @@ public class TfIdfTransformation {
         System.out.println("Clusters: " + (entropia.mediaEntrClu(EntropiaClusters)-entropia.mediaEntrClu(EnCluRand)));
         System.out.println("Categorie: " + (entropia.mediaEntrCat(EntropiaCategorie,clustersNew)-entropia.mediaEntrCat(EnCatRand, clustersRand)));
 
+        /*
+        JavaPairRDD<WikiPage, Integer> clustersRand = pagesAndVectors.mapToPair(pav -> {
+            return new Tuple2<WikiPage, Integer>(pav._1(), RandomCluster.predict(pav._2()));
+        });
+
         //Calcolo del WCSS che valuta il clustering k-means
+        //Map.Entry<String, List<Integer>> e : tmp.collectAsMap().entrySet()
         Map<WikiPage, Vector> temp = pagesAndVectors.collectAsMap();
         double media = 0.0;
         double randmedia = 0.0;
@@ -231,9 +245,16 @@ public class TfIdfTransformation {
         for(int i=0; i<numClusters; i++){
             for(Vector center : clusters.clusterCenters()){
                 for (Tuple2<WikiPage, Integer> wp : clustersNew.collect()) {
-                    if (wp._2()==i){
-                        tosquare=Distance.euclidianDistance(center, temp.get(wp._1()));
-                        media=media+ (tosquare*tosquare);
+                    if (wp._2() == i){
+                        try{
+                            tosquare = Distance.euclidianDistance(center, temp.get(wp._1()));
+                            media = media + (tosquare*tosquare);
+                        }catch(java.lang.NullPointerException e){
+                            System.out.println(e);
+                            System.out.println("center:" + center);
+                            System.out.println(temp.get(wp._1()));
+                            media = media + 0.0;
+                        }
                     }
                 }
             }
@@ -243,16 +264,21 @@ public class TfIdfTransformation {
         for(int i=0; i<numClusters; i++){
             for(Vector center : random.clusterCenters()){
                 for (Tuple2<WikiPage, Integer> wp : clustersRand.collect()) {
-                    if (wp._2()==i){
-                        tosquare=Distance.euclidianDistance(center, temp.get(wp._1()));
-                        randmedia= randmedia+ (tosquare*tosquare);
+                    if (wp._2() == i){
+                        try {
+                            tosquare = Distance.euclidianDistance(center, temp.get(wp._1()));
+                            randmedia = randmedia + (tosquare * tosquare);
+                        }catch(java.lang.NullPointerException e){
+                            System.out.println(e);
+                            randmedia = randmedia + 0.0;
+                        }
                     }
                 }
             }
         }//fine for più esterno
 
-        System.out.println("WCSS - Media calcolata cluster k-means = " + media);
         System.out.println("WCSS - Media calcolata cluster random = " + randmedia);
+        */
 
         // Now we can apply the MR algorithm for word count.
         // Note that we are using `mapToPair` instead of `map`, since

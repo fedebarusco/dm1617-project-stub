@@ -53,6 +53,7 @@ di dati:
  - numero di pagine presenti nel dataset dopo il preprocessing (va ricordato che con Word2Vec
  non sono comprese le parole che si ripetono meno di 2 volte);
  - numero di categorie totali (distinte) presenti nel dataset;
+ - il valore della funzione obiettivo di kmean;
  - media dei cluster contenenti una stessa categoria (usata per il calcolo di 1/c(category));
  - il Silhouette Coefficient sul cluster generato con kmeans;
  - il silhouette coefficient sul cluster random;

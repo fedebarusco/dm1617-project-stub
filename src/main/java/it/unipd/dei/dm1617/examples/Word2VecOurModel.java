@@ -13,6 +13,7 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.feature.Word2Vec;
 import org.apache.spark.mllib.feature.Word2VecModel;
 import org.apache.spark.mllib.linalg.Vectors;
+import org.apache.spark.rdd.RDD;
 import scala.Tuple2;
 import org.apache.spark.mllib.clustering.StreamingKMeans;
 import org.apache.spark.mllib.linalg.Vectors;
@@ -110,7 +111,7 @@ public class Word2VecOurModel {
                 } catch (java.lang.IllegalStateException e) {
                     i++;
                     tmp = null;
-                    System.out.println(e);
+                    //System.out.println(e);
                     continue;
                 }
                 if (docvec == null) {
@@ -119,7 +120,7 @@ public class Word2VecOurModel {
                     docvec = sumVectors(tmp, docvec);
                 }
             }
-            System.out.println("Parole perse perchè non contenute nel vocabolario di scala:" + i);
+            //System.out.println("Parole perse perchè non contenute nel vocabolario di scala:" + i);
             return new Tuple2<WikiPage, Vector>(pair._1(), docvec);
         });
 
@@ -154,7 +155,7 @@ public class Word2VecOurModel {
             Una volta trovato il clustering, quindi la partizione di punti in k cluster, per ciascun
             cluster, il miglior centro ai fini della funzione obiettivo di k-means è il centroide.
         */
-        int numClusters = 100;
+        int numClusters = 2;
         int numIterations = 20;
         KMeansModel clusters = KMeans.train(data.rdd(), numClusters, numIterations);
 
@@ -188,6 +189,11 @@ public class Word2VecOurModel {
         //numero categorie distinte
         int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
         System.out.println("numero di categorie totali distinte:" + size);
+
+        //Calcolo del valore della funzione obiettivo
+        RDD<Vector> data2= data.rdd();
+        double f_obiettivo = clusters.computeCost(data2);
+        System.out.println("Esito di compute cost: " + f_obiettivo);
 
         //tovo in quanti cluster viene sparsa una categoria
         ArrayList<Integer> size_cluster = new ArrayList<>();
@@ -250,6 +256,7 @@ public class Word2VecOurModel {
         System.out.println("Clusters: " + (entropia.mediaEntrClu(EntropiaClusters)-entropia.mediaEntrClu(EnCluRand)));
         System.out.println("Categorie: " + (entropia.mediaEntrCat(EntropiaCategorie,clustersNew)-entropia.mediaEntrCat(EnCatRand, clustersRand)));
 
+        /*
         //Calcolo del WCSS che valuta il clustering k-means
         Map<WikiPage, Vector> temp = pagesAndVectors.collectAsMap();
         double media = 0.0;
@@ -279,8 +286,8 @@ public class Word2VecOurModel {
             }
         }//fine for più esterno
 
-        System.out.println("WCSS - Media calcolata cluster k-means = " + media);
         System.out.println("WCSS - Media calcolata cluster random = " + randmedia);
+        */
     }
 
     //metodo che implementa la somma tra oggetti Vector
