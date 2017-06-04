@@ -196,7 +196,7 @@ public class Word2VecOurModel {
         double f_obiettivo = clusters.computeCost(data2);
         System.out.println("Esito di compute cost (funzione obiettivo k-means): " + f_obiettivo);
 
-        //tovo in quanti cluster viene sparsa una categoria
+        //trovo in quanti cluster viene sparsa una categoria
         ArrayList<Integer> size_cluster = new ArrayList<>();
         JavaPairRDD<String, List<Integer>> tmp = Analyzer.getNumberOfClustersPerCat(clustersNew);
         for (Map.Entry<String, List<Integer>> e : tmp.collectAsMap().entrySet()) {

@@ -158,7 +158,7 @@ public class TfIdfTransformation {
         //creo un cluster random
         RandomCluster random = new RandomCluster(pagesAndVectors, numClusters);
 
-        //compute in how many clusters a category is split
+        //trovo in quanti cluster viene sparsa una categoria
         ArrayList<Integer> size_cluster = new ArrayList<>();
         JavaPairRDD<String, List<Integer>> tmp = Analyzer.getNumberOfClustersPerCat(clustersNew);
         for (Map.Entry<String, List<Integer>> e : tmp.collectAsMap().entrySet()) {
