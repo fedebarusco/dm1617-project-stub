@@ -21,7 +21,8 @@ Distance e altro ancora. Invece, le classi implementate da noi sono:
  descritto nella relazione sulle pagine, parole e categorie, crea il cluster k-means per un
  dato valore di k (impostato attraverso la variabile numClusters), crea il cluster random
  per un sottoinsieme del dataset in input, 
- calcola i valori necessari per 1/c(cat), per l'Entropia e per il Silhouette Coefficient.
+ calcola i valori necessari per 1/E(c(cat)) ('E' indica l'aspettazione), 
+ per la funzione obiettivo del cluster k-means, per l'Entropia e per il Silhouette Coefficient.
  - entropia: contiene i metodi per il calcolo dell'Entropia dei cluster e delle cateogorie.
  - RandomCluster: contiene i metodi per creare un cluster random su un insieme ridotto 
 dei dati del dataset di input.
@@ -54,7 +55,7 @@ di dati:
  non sono comprese le parole che si ripetono meno di 2 volte);
  - numero di categorie totali (distinte) presenti nel dataset;
  - il valore della funzione obiettivo di kmean;
- - media dei cluster contenenti una stessa categoria (usata per il calcolo di 1/c(category));
+ - media dei cluster contenenti una stessa categoria (usata per il calcolo di 1/E(c(category)));
  - il Silhouette Coefficient sul cluster generato con kmeans;
  - il silhouette coefficient sul cluster random;
  - media dell'Entropia dei cluster di kmeans;

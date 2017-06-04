@@ -25,7 +25,8 @@ import java.util.*;
 /*
 * La classe Word2VecOurModel:
 * implementa l'utilizzo del modello Word2Vec e di k-means;
-* calcola ciò che serve per il calcolo di 1/c(cat);
+* calcola ciò che serve per il calcolo di 1/E(c(cat)) con E che indica l'aspettazione;
+* calcola la funzione obiettivo del cluster k-means;
 * richiama le funzioni per il calcolo di Entropia e di Silhouette per k-means e per il cluster random.
 * */
 public class Word2VecOurModel {
@@ -42,7 +43,7 @@ public class Word2VecOurModel {
         //percorso di Giovanni:
         //System.setProperty("hadoop.home.dir", "C:\\Users\\Giovanni\\Documents\\unipd\\magistrale\\Mining\\progetto");
         //percorso di Emanuele;
-        System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
+        //System.setProperty("hadoop.home.dir", "C:\\Users\\Emanuele\\Desktop\\hadoop");
 
         // Load dataset of pages
         JavaRDD<WikiPage> pages = InputOutput.read(sc, dataPath);
@@ -190,10 +191,10 @@ public class Word2VecOurModel {
         int size = Analyzer.getCategoriesFrequencies(clustersNew).collect().size();
         System.out.println("numero di categorie totali distinte:" + size);
 
-        //Calcolo del valore della funzione obiettivo
+        //Calcolo del valore della funzione obiettivo per il cluster k-means
         RDD<Vector> data2= data.rdd();
         double f_obiettivo = clusters.computeCost(data2);
-        System.out.println("Esito di compute cost: " + f_obiettivo);
+        System.out.println("Esito di compute cost (funzione obiettivo k-means): " + f_obiettivo);
 
         //tovo in quanti cluster viene sparsa una categoria
         ArrayList<Integer> size_cluster = new ArrayList<>();
@@ -255,39 +256,6 @@ public class Word2VecOurModel {
         System.out.println("Differenza Entropie Kmeans-Random");
         System.out.println("Clusters: " + (entropia.mediaEntrClu(EntropiaClusters)-entropia.mediaEntrClu(EnCluRand)));
         System.out.println("Categorie: " + (entropia.mediaEntrCat(EntropiaCategorie,clustersNew)-entropia.mediaEntrCat(EnCatRand, clustersRand)));
-
-        /*
-        //Calcolo del WCSS che valuta il clustering k-means
-        Map<WikiPage, Vector> temp = pagesAndVectors.collectAsMap();
-        double media = 0.0;
-        double randmedia = 0.0;
-        double tosquare = 0.0;
-        //da definizione è complesso assai, k^2*wikipages
-        for(int i=0; i<numClusters; i++){
-            for(Vector center : clusters.clusterCenters()){
-                for (Tuple2<WikiPage, Integer> wp : clustersNew.collect()) {
-                    if (wp._2()==i){
-                        tosquare=Distance.euclidianDistance(center, temp.get(wp._1()));
-                        media=media+ (tosquare*tosquare);
-                    }
-                }
-            }
-        }//fine for più esterno
-        System.out.println("WCSS - Media calcolata cluster k-means = " + media);
-
-        for(int i=0; i<numClusters; i++){
-            for(Vector center : random.clusterCenters()){
-                for (Tuple2<WikiPage, Integer> wp : clustersRand.collect()) {
-                    if (wp._2()==i){
-                        tosquare=Distance.euclidianDistance(center, temp.get(wp._1()));
-                        randmedia= randmedia+ (tosquare*tosquare);
-                    }
-                }
-            }
-        }//fine for più esterno
-
-        System.out.println("WCSS - Media calcolata cluster random = " + randmedia);
-        */
     }
 
     //metodo che implementa la somma tra oggetti Vector
