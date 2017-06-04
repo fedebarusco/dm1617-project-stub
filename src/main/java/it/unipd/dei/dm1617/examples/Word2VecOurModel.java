@@ -129,11 +129,11 @@ public class Word2VecOurModel {
             return pair != null && pair._2() != null && pair._1() != null;
         }).cache();
 
-        for (Tuple2<WikiPage, Vector> el : pagesAndVectors.collect()) {
-            System.out.println(el._1().getTitle());
-            System.out.println(el._2());
-        }
-        System.out.println();
+        //for (Tuple2<WikiPage, Vector> el : pagesAndVectors.collect()) {
+        //    System.out.println(el._1().getTitle());
+        //    System.out.println(el._2());
+        //}
+        //System.out.println();
 
         JavaRDD<Vector> data = pagesAndVectors.map(pair -> pair._2());
 
@@ -160,15 +160,15 @@ public class Word2VecOurModel {
         int numIterations = 20;
         KMeansModel clusters = KMeans.train(data.rdd(), numClusters, numIterations);
 
-        System.out.println("Cluster centers:");
-        for (Vector center : clusters.clusterCenters()) {
-            System.out.println(" " + center);
-        }
+        //System.out.println("Cluster centers:");
+        //for (Vector center : clusters.clusterCenters()) {
+        //    System.out.println(" " + center);
+        //}
         // here is what I added to predict data points that are within the clusters
-        List<Integer> L = clusters.predict(data).collect();
-        for (Integer i : L) {
-            System.out.println(i);
-        }
+        //List<Integer> L = clusters.predict(data).collect();
+        //for (Integer i : L) {
+        //    System.out.println(i);
+        //}
 
         //creo un cluster random
         RandomCluster random = new RandomCluster(pagesAndVectors, numClusters);
