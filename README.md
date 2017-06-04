@@ -30,7 +30,7 @@ dei dati del dataset di input.
  - SilhouetteOnRandom: contiene i metodi per il calcolo del Slhouette Coefficient nel 
 cluster random.
  - Analyzer: contiene tutte le funzioni che attraverso l'utilizzo dei 
-metodi di Spark restituiscono i valori necessari per il calcolo di 1/c(cat), 
+metodi di Spark restituiscono i valori necessari per il calcolo di 1/E(c(cat)), 
 dell'Entropia e di Silhouette.
 
 Inoltre, nella classe TfIdfTransformation che implementa l'utilizzo del modello TfIdf sono state aggiunte tutte
@@ -54,12 +54,12 @@ di dati:
  - numero di pagine presenti nel dataset dopo il preprocessing (va ricordato che con Word2Vec
  non sono comprese le parole che si ripetono meno di 2 volte);
  - numero di categorie totali (distinte) presenti nel dataset;
- - il valore della funzione obiettivo di kmean;
+ - il valore della funzione obiettivo di k-means;
  - media dei cluster contenenti una stessa categoria (usata per il calcolo di 1/E(c(category)));
- - il Silhouette Coefficient sul cluster generato con kmeans;
+ - il Silhouette Coefficient sul cluster generato con k-means;
  - il silhouette coefficient sul cluster random;
- - media dell'Entropia dei cluster di kmeans;
- - media dell'Entropia delle categorie di kmeans;
+ - media dell'Entropia dei cluster di k-means;
+ - media dell'Entropia delle categorie di k-means;
  - media dell'Entropia dei cluster del cluster random;
  - media dell'Entropia delle categorie del cluster random;
  - differenza delle Entropie Kmeans-ClusterRandom sia per quanto riguarda le categoria sia per
